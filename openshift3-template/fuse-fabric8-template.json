@@ -1,0 +1,316 @@
+{
+  "kind": "Template",
+  "apiVersion": "v1",
+  "metadata": {
+    "name": "fuse-fabric8-6.2.1.84",
+    "creationTimestamp": null,
+    "annotations": {
+      "description": "Fuse fabric8 template",
+      "iconClass": "icon-fuse",
+      "tags": "fuse,fabric8,openshift3"
+    }
+  },
+  "objects": [
+    {
+      "kind": "Service",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${FABRIC_ROOT_ENSEMBLE_CONTAINER_NAME}",
+        "creationTimestamp": null,
+	"annotations": {
+	  "description": "Fuse Fabric8 Master Node Service"
+	}
+      },
+      "spec": {
+        "ports": [
+          {
+            "name": "web",
+            "protocol": "TCP",
+            "port": 8181,
+            "targetPort": 8181,
+            "nodePort": 0
+          },
+          {
+            "name": "zk_client",
+            "protocol": "TCP",
+            "port": 2181,
+            "targetPort": 2181,
+            "nodePort": 0
+          },
+          {
+            "name": "zk_followers",
+            "protocol": "TCP",
+            "port": 2888,
+            "targetPort": 2888,
+            "nodePort": 0
+          },
+          {
+            "name": "zk_election",
+            "protocol": "TCP",
+            "port": 3888,
+            "targetPort": 3888,
+            "nodePort": 0
+          }
+        ],
+        "selector": {
+          "name": "${FABRIC_ROOT_ENSEMBLE_CONTAINER_NAME}"
+        },
+        "portalIP": "",
+        "type": "ClusterIP",
+        "sessionAffinity": "None"
+      }
+    },
+    {
+      "kind": "Route",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${FABRIC_ROOT_ENSEMBLE_CONTAINER_NAME}",
+        "creationTimestamp": null,
+	"annotations": {
+	  "description": "Fabric Master Node Route"
+	}
+      },
+      "spec": {
+          "host": "${FABRIC_ROOT_ENSEMBLE_CONTAINER_NAME}${PUBLIC_FQDN}",
+          "to": {
+              "kind": "Service",
+              "name": "${FABRIC_ROOT_ENSEMBLE_CONTAINER_NAME}"
+          }
+      },
+      "status": {}
+    },
+    {
+      "kind": "ImageStream",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${FABRIC_ROOT_ENSEMBLE_CONTAINER_NAME}",
+        "annotations": {
+          "description": "Fabric Image from Build"
+        }
+      },
+      "spec": {},
+      "status": {
+        "dockerImageRepository": ""
+      }
+    },
+    {
+      "kind": "ImageStream",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "fuse-base-install",
+        "creationTimestamp": null
+      },
+      "spec": {
+        "dockerImageRepository": "${FUSE_BASE_IMAGE}:${FUSE_IMAGE_VERSION}"
+      },
+      "status": {
+        "dockerImageRepository": ""
+      }
+    },
+    {
+        "kind": "BuildConfig",
+        "apiVersion": "v1",
+        "metadata": {
+            "name": "${FABRIC_ROOT_ENSEMBLE_CONTAINER_NAME}",
+            "creationTimestamp": null,
+            "labels": {
+                "app": "${FABRIC_ROOT_ENSEMBLE_CONTAINER_NAME}"
+            },
+	    "annotations": {
+	      "description": "Build the Fabric Image from GIT Source"
+	    }
+        },
+        "spec": {
+            "triggers": [
+                {
+                    "type": "GitHub",
+                    "github": {
+                        "secret": "mrobson911secret"
+                    }
+                },
+                {
+                    "type": "ConfigChange"
+                },
+                {
+                    "type": "ImageChange",
+                    "imageChange": {}
+                }
+            ],
+            "source": {
+                "type": "Git",
+                "git": {
+                    "uri": "${FABRIC_IMAGE_GIT_REPO}",
+                    "ref": "${FABRIC_IMAGE_VERSION}"
+                }
+            },
+            "strategy": {
+                "type": "Docker",
+                "dockerStrategy": {
+                    "from": {
+                        "kind": "DockerImage",
+                        "name": "${FABRIC_BASE_IMAGE}:${FABRIC_IMAGE_VERSION}"
+                    },
+		    "forcePull": true
+                }
+            },
+            "output": {
+                "to": {
+                    "kind": "ImageStreamTag",
+                    "name": "${FABRIC_ROOT_ENSEMBLE_CONTAINER_NAME}:${FABRIC_IMAGE_VERSION}"
+                }
+            },
+            "resources": {}
+        },
+        "status": {
+            "lastVersion": 0
+        }
+    },
+    {
+      "kind": "DeploymentConfig",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${FABRIC_ROOT_ENSEMBLE_CONTAINER_NAME}",
+        "creationTimestamp": null
+      },
+      "spec": {
+        "strategy": {
+          "type": "Recreate",
+          "resources": {}
+        },
+        "triggers": [
+          {
+            "type": "ImageChange",
+            "imageChangeParams": {
+              "automatic": true,
+              "containerNames": [
+                "fuse-standalone"
+              ],
+              "from": {
+                "kind": "ImageStreamTag",
+                "name": "${FABRIC_ROOT_ENSEMBLE_CONTAINER_NAME}:${FABRIC_IMAGE_VERSION}"
+              }
+            }
+          },
+          {
+            "type": "ConfigChange"
+          }
+        ],
+        "replicas": 1,
+        "selector": {
+          "name": "${FABRIC_ROOT_ENSEMBLE_CONTAINER_NAME}"
+        },
+        "template": {
+          "metadata": {
+            "creationTimestamp": null,
+            "labels": {
+              "name": "${FABRIC_ROOT_ENSEMBLE_CONTAINER_NAME}"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "name": "${FABRIC_ROOT_ENSEMBLE_CONTAINER_NAME}",
+                "image": "${FABRIC_IMAGE}:${FABRIC_IMAGE_VERSION}",
+                "resources": {},
+                "terminationMessagePath": "/dev/termination-log",
+                "imagePullPolicy": "IfNotPresent",
+                "capabilities": {},
+                "securityContext": {
+                  "capabilities": {},
+                  "privileged": false
+                }
+		"env": [
+		  {
+	            "name": "FABRIC_ROOT_ENSEMBLE_CONTAINER_NAME",
+	            "description": "Fabric Root Ensemble Container Name",
+	            "value": "fuse-fabric-master"
+                  }
+		]
+              }
+            ],
+            "restartPolicy": "Always",
+            "dnsPolicy": "ClusterFirst"
+          }
+        }
+      }
+    },
+/*    {
+      "kind": "Service",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${FUSE_CONTAINER_NAME}",
+        "creationTimestamp": null
+      },
+      "spec": {
+        "ports": [
+          {
+            "name": "web",
+            "protocol": "TCP",
+            "port": 8181,
+            "targetPort": 8181,
+            "nodePort": 0
+          },
+          {
+            "name": "zk_client",
+            "protocol": "TCP",
+            "port": 2181,
+            "targetPort": 2181,
+            "nodePort": 0
+          },
+          {
+            "name": "zk_followers",
+            "protocol": "TCP",
+            "port": 2888,
+            "targetPort": 2888,
+            "nodePort": 0
+          },
+          {
+            "name": "zk_election",
+            "protocol": "TCP",
+            "port": 3888,
+            "targetPort": 3888,
+            "nodePort": 0
+          }
+        ],
+        "selector": {
+          "name": "${FUSE_CONTAINER_NAME}"
+        },
+        "portalIP": "",
+        "type": "ClusterIP",
+        "sessionAffinity": "None"
+      }
+    },
+*/
+
+  ],
+  "parameters": [
+    {
+      "name": "FUSE_CONTAINER_NAME",
+      "description": "Fuse Container Name",
+      "value": "fuse-fabric8"
+    },
+    {
+      "name": "FABRIC_IMAGE",
+      "description": "Fabric Docker Image",
+      "value": "mrobson/fuse-fabric8"
+    },
+    {
+      "name": "FABRIC_BASE_IMAGE",
+      "description": "Fabric Base Docker Image",
+      "value": "mrobson/fuse-base-install"
+    },
+    {
+      "name": "FABRIC_IMAGE_VERSION",
+      "description": "Fabric Docker Image Version",
+      "value": "6.2.1.84"
+    },
+    {
+      "name": "Fabic_IMAGE_GIT_REPO",
+      "description": "Fabric Standalone Image Git Repo",
+      "value": "https://github.com/mrobson/fuse-fabric8.git"
+    }
+  ],
+  "labels": {
+    "template": "fuse-fabric8-6.2.1.84"
+  }
+}
