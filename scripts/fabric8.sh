@@ -86,12 +86,12 @@ elif [ "$FABRIC_ORIGINAL_MASTER" == "false" ] && [ "$FABRIC_JOINED" == "false" ]
 		if [ -z "$curl" ]; then
 			echo ""
 		else
-			rootEns=`echo $curl | python -c 'import json,sys,re,os
-			obj=json.load(sys.stdin)
-			for c in obj["value"]["children"]:
-					if re.match(os.environ["FABRIC_ENSEMBLE_CONTAINER_NAME"], c):
-								print c
-								'`
+rootEns=`echo $curl | python -c 'import json,sys,re,os
+obj=json.load(sys.stdin)
+for c in obj["value"]["children"]:
+		if re.match(os.environ["FABRIC_ENSEMBLE_CONTAINER_NAME"], c):
+					print c
+					'`
 			echo "Root Ensemble is " $rootEns
 			provStatus=`curl -u ${FABRIC_USER}:${FABRIC_PASSWD} -s 'http://i'${FABRIC_ENSEMBLE_ROOT_CONTAINER_NAME}'.default.endpoints.cluster.local:8181/jolokia/exec/io.fabric8:type=ZooKeeper/read/!/fabric!/registry!/containers!/provision!/'$root'!/result' | python -c "import json,sys;obj=json.load(sys.stdin);print obj['value']['stringData'];"`
 			#json=`echo $curl | python -c "import json,sys;obj=json.load(sys.stdin);print obj['value'][1]['healthPercent'];"`
