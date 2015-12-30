@@ -82,7 +82,7 @@ elif [ "$FABRIC_ORIGINAL_MASTER" == "false" ] && [ "$FABRIC_JOINED" == "false" ]
 		#curl=`curl -u ${FABRIC_USER}:${FABRIC_PASSWD} -s 'http://${FABRIC_ENSEMBLE_ROOT_CONTAINER_NAME}.default.endpoints.cluster.local:8181/jolokia/exec/io.fabric8:type=ZooKeeper/read/!/fabric!/registry!/containers!/provision!/fuse-fabric8-ensemble-1-1-fzlrz!/result'`
 		echo "Ensemble Master Check"
 		curl=`curl -u ${FABRIC_USER}:${FABRIC_PASSWD} -s 'http://'${FABRIC_ENSEMBLE_ROOT_CONTAINER_NAME}'.default.endpoints.cluster.local:8181/jolokia/exec/io.fabric8:type=ZooKeeper/read/!/fabric!/registry!/containers!/alive'`
-
+		echo "Alive CURL " $curl
 		if [ -z "$curl" ]; then
 			echo ""
 		else
@@ -92,8 +92,10 @@ elif [ "$FABRIC_ORIGINAL_MASTER" == "false" ] && [ "$FABRIC_JOINED" == "false" ]
 					if re.match(os.environ["FABRIC_ENSEMBLE_CONTAINER_NAME"], c):
 								print c
 								'`
+			echo "Root Ensemble is " $rootEns
 			provStatus=`curl -u ${FABRIC_USER}:${FABRIC_PASSWD} -s 'http://i'${FABRIC_ENSEMBLE_ROOT_CONTAINER_NAME}'.default.endpoints.cluster.local:8181/jolokia/exec/io.fabric8:type=ZooKeeper/read/!/fabric!/registry!/containers!/provision!/'$root'!/result' | python -c "import json,sys;obj=json.load(sys.stdin);print obj['value']['stringData'];"`
 			#json=`echo $curl | python -c "import json,sys;obj=json.load(sys.stdin);print obj['value'][1]['healthPercent'];"`
+			echo "Provisioning Status is " $provStatus
 		fi
 		if [ "$provStatus" == "success" ]; then
 			./bin/client "version"; return=$?
