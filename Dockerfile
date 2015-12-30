@@ -10,4 +10,6 @@ WORKDIR /opt/fuse/${FUSE_ARTIFACT}
 
 COPY scripts/fabric8.sh /opt/fuse/jboss-fuse-full/bin/fabric8.sh
 
+RUN chmod +x /opt/fuse/jboss-fuse-full/bin/fabric8.sh
+
 ENTRYPOINT ["/opt/fuse/jboss-fuse-full/bin/fabric8.sh"]
