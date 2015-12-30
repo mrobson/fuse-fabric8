@@ -59,6 +59,7 @@ if [ "$FABRIC_ORIGINAL_MASTER" == "true" ] && [ "$FABRIC_JOINED" == "false" ]; t
 		#	wait $code; return=$?
 		#fi
 		if [ $return -eq 0 ]; then
+			sleep 15
 			./bin/client "fabric:create --wait-for-provisioning --verbose --clean --new-user mrobson --new-user-role admin --new-user-password password --zookeeper-password passwd --resolver manualip --manual-ip fuse-fabric8-ensemble-1.default.endpoints.cluster.local"
 			export FABRIC_JOINED=true
 			break
@@ -105,6 +106,7 @@ elif [ "$FABRIC_ORIGINAL_MASTER" == "false" ] && [ "$FABRIC_JOINED" == "false" ]
 			#	echo "waited"
 			#fi
 			if [ $return -eq 0 ]; then
+				sleep 15
 				./bin/client "fabric:join --zookeeper-password passwd --resolver manualip --manual-ip fuse-fabric8-ensemble-4.default.endpoints.cluster.local fuse-fabric8-ensemble-1.default.endpoints.cluster.local:2181"
 				export FABRIC_JOINED=true
 				break
