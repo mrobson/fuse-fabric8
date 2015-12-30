@@ -60,7 +60,7 @@ if [ "$FABRIC_ORIGINAL_MASTER" == "true" ] && [ "$FABRIC_JOINED" == "false" ]; t
 		#fi
 		if [ $return -eq 0 ]; then
 			sleep 15
-			./bin/client "fabric:create --wait-for-provisioning --verbose --clean --new-user mrobson --new-user-role admin --new-user-password password --zookeeper-password passwd --resolver manualip --manual-ip fuse-fabric8-ensemble-1.default.endpoints.cluster.local"
+			./bin/client "fabric:create --wait-for-provisioning --verbose --clean --new-user mrobson --new-user-role admin --new-user-password password --zookeeper-password passwd --resolver manualip --manual-ip fuse-fabric8-ensemble-1.default.endpoints.cluster.local" &
 			export FABRIC_JOINED=true
 			break
 		else
@@ -81,7 +81,7 @@ elif [ "$FABRIC_ORIGINAL_MASTER" == "false" ] && [ "$FABRIC_JOINED" == "false" ]
 		#curl=`curl -u mrobson:password -s http://fuse-fabric8-ensemble-1.default.endpoints.cluster.local:8181/jolokia/exec/io.fabric8:service=Health/healthList`
 		#curl=`curl -u ${FABRIC_USER}:${FABRIC_PASSWD} -s 'http://${FABRIC_ENSEMBLE_ROOT_CONTAINER_NAME}.default.endpoints.cluster.local:8181/jolokia/exec/io.fabric8:type=ZooKeeper/read/!/fabric!/registry!/containers!/provision!/fuse-fabric8-ensemble-1-1-fzlrz!/result'`
 		echo "Ensemble Master Check"
-		curl=`curl -u ${FABRIC_USER}:${FABRIC_PASSWD} -s 'http://${FABRIC_ENSEMBLE_ROOT_CONTAINER_NAME}.default.endpoints.cluster.local:8181/jolokia/exec/io.fabric8:type=ZooKeeper/read/!/fabric!/registry!/containers!/alive'`
+		curl=`curl -u ${FABRIC_USER}:${FABRIC_PASSWD} -s 'http://'${FABRIC_ENSEMBLE_ROOT_CONTAINER_NAME}'.default.endpoints.cluster.local:8181/jolokia/exec/io.fabric8:type=ZooKeeper/read/!/fabric!/registry!/containers!/alive'`
 
 		if [ -z "$curl" ]; then
 			echo ""
@@ -92,7 +92,7 @@ elif [ "$FABRIC_ORIGINAL_MASTER" == "false" ] && [ "$FABRIC_JOINED" == "false" ]
 					if re.match(os.environ["FABRIC_ENSEMBLE_CONTAINER_NAME"], c):
 								print c
 								'`
-			provStatus=`curl -u ${FABRIC_USER}:${FABRIC_PASSWD} -s 'http://${FABRIC_ENSEMBLE_ROOT_CONTAINER_NAME}.default.endpoints.cluster.local:8181/jolokia/exec/io.fabric8:type=ZooKeeper/read/!/fabric!/registry!/containers!/provision!/'$root'!/result' | python -c "import json,sys;obj=json.load(sys.stdin);print obj['value']['stringData'];"`
+			provStatus=`curl -u ${FABRIC_USER}:${FABRIC_PASSWD} -s 'http://i'${FABRIC_ENSEMBLE_ROOT_CONTAINER_NAME}'.default.endpoints.cluster.local:8181/jolokia/exec/io.fabric8:type=ZooKeeper/read/!/fabric!/registry!/containers!/provision!/'$root'!/result' | python -c "import json,sys;obj=json.load(sys.stdin);print obj['value']['stringData'];"`
 			#json=`echo $curl | python -c "import json,sys;obj=json.load(sys.stdin);print obj['value'][1]['healthPercent'];"`
 		fi
 		if [ "$provStatus" == "success" ]; then
@@ -107,7 +107,7 @@ elif [ "$FABRIC_ORIGINAL_MASTER" == "false" ] && [ "$FABRIC_JOINED" == "false" ]
 			#fi
 			if [ $return -eq 0 ]; then
 				sleep 15
-				./bin/client "fabric:join --zookeeper-password passwd --resolver manualip --manual-ip fuse-fabric8-ensemble-4.default.endpoints.cluster.local fuse-fabric8-ensemble-1.default.endpoints.cluster.local:2181"
+				./bin/client "fabric:join --zookeeper-password passwd --resolver manualip --manual-ip fuse-fabric8-ensemble-4.default.endpoints.cluster.local fuse-fabric8-ensemble-1.default.endpoints.cluster.local:2181" &
 				export FABRIC_JOINED=true
 				break
 			else
