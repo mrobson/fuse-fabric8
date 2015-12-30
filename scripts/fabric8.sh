@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+#set -e
 
 if [ -z $FABRIC_ORIGINAL_MASTER ]; then
 	echo "FABRIC_ORIGINAL_MASTER has not been set, something is wrong with the pod"
@@ -45,6 +45,7 @@ echo "Sleeping 60"
 sleep 60
 
 if [ "$FABRIC_ORIGINAL_MASTER" == "true" ] && [ "$FABRIC_JOINED" == "false" ]; then
+	count=0
 	while :
 	do
 		echo "Master Client Check"
@@ -52,6 +53,7 @@ if [ "$FABRIC_ORIGINAL_MASTER" == "true" ] && [ "$FABRIC_JOINED" == "false" ]; t
 		sleep 15
 		process=`ps -o pid $code | pcregrep '\d+' | tr \\n ' ' | wc -l`
 		return=1
+		echo "Process Return " $process
 		if [ $process -ne 1 ]; then
 			wait $code; return=$?
 		fi
@@ -62,6 +64,7 @@ if [ "$FABRIC_ORIGINAL_MASTER" == "true" ] && [ "$FABRIC_JOINED" == "false" ]; t
 		else
 			sleep 5
 			(( count++ ))
+			echo "Failures at " $count
 			if [ $count == 60 ]; then
 				echo "Failed to get a client session after 5 minutes, fabric join exiting on " $HOSTNAME
 				exit 1
@@ -69,6 +72,7 @@ if [ "$FABRIC_ORIGINAL_MASTER" == "true" ] && [ "$FABRIC_JOINED" == "false" ]; t
 		fi
 	done
 elif [ "$FABRIC_ORIGINAL_MASTER" == "false" ] && [ "$FABRIC_JOINED" == "false" ]; then
+	count=0
 	while :
 	do
 		#curl=`curl -u mrobson:password -s http://fuse-fabric8-ensemble-1.default.endpoints.cluster.local:8181/jolokia/exec/io.fabric8:service=Health/healthList`
