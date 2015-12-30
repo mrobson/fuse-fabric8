@@ -72,6 +72,7 @@ if [ "$FABRIC_ORIGINAL_MASTER" == "true" ] && [ "$FABRIC_JOINED" == "false" ]; t
 			fi
 		fi
 	done
+	wait $process
 elif [ "$FABRIC_ORIGINAL_MASTER" == "false" ] && [ "$FABRIC_JOINED" == "false" ]; then
 	count=0
 	while :
@@ -124,6 +125,7 @@ elif [ "$FABRIC_ORIGINAL_MASTER" == "false" ] && [ "$FABRIC_JOINED" == "false" ]
 			fi
 		fi
 	done
+	wait $process
 else
 	echo "Something is wrong, FABRIC_ORIGINAL_MASTER can only be true or false"
 fi
