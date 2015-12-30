@@ -93,7 +93,7 @@ for c in obj["value"]["children"]:
 					print c
 					'`
 			echo "Root Ensemble is " $rootEns
-			provStatus=`curl -u ${FABRIC_USER}:${FABRIC_PASSWD} -s 'http://i'${FABRIC_ENSEMBLE_ROOT_CONTAINER_NAME}'.default.endpoints.cluster.local:8181/jolokia/exec/io.fabric8:type=ZooKeeper/read/!/fabric!/registry!/containers!/provision!/'$root'!/result' | python -c "import json,sys;obj=json.load(sys.stdin);print obj['value']['stringData'];"`
+			provStatus=`curl -u ${FABRIC_USER}:${FABRIC_PASSWD} -s 'http://'${FABRIC_ENSEMBLE_ROOT_CONTAINER_NAME}'.default.endpoints.cluster.local:8181/jolokia/exec/io.fabric8:type=ZooKeeper/read/!/fabric!/registry!/containers!/provision!/'$rootEns'!/result' | python -c "import json,sys;obj=json.load(sys.stdin);print obj['value']['stringData'];"`
 			#json=`echo $curl | python -c "import json,sys;obj=json.load(sys.stdin);print obj['value'][1]['healthPercent'];"`
 			echo "Provisioning Status is " $provStatus
 		fi
