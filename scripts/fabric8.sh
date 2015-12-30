@@ -39,12 +39,15 @@ if [ -z $ZK_PASSWD ]; then
 	exit 1
 fi
 
-./bin/fuse $START_ARG
+echo "Starting Fuse"
+./bin/fuse $START_ARG &
+echo "Sleeping 60"
 sleep 60
 
 if [ "$FABRIC_ORIGINAL_MASTER" == "true" ] && [ "$FABRIC_JOINED" == "false" ]; then
 	while :
 	do
+		echo "Master Client Check"
 		./bin/client & code=$!
 		sleep 15
 		process=`ps -o pid $code | pcregrep '\d+' | tr \\n ' ' | wc -l`
@@ -70,7 +73,7 @@ elif [ "$FABRIC_ORIGINAL_MASTER" == "false" ] && [ "$FABRIC_JOINED" == "false" ]
 	do
 		#curl=`curl -u mrobson:password -s http://fuse-fabric8-ensemble-1.default.endpoints.cluster.local:8181/jolokia/exec/io.fabric8:service=Health/healthList`
 		#curl=`curl -u ${FABRIC_USER}:${FABRIC_PASSWD} -s 'http://${FABRIC_ENSEMBLE_ROOT_CONTAINER_NAME}.default.endpoints.cluster.local:8181/jolokia/exec/io.fabric8:type=ZooKeeper/read/!/fabric!/registry!/containers!/provision!/fuse-fabric8-ensemble-1-1-fzlrz!/result'`
-
+		echo "Ensemble Master Check"
 		curl=`curl -u ${FABRIC_USER}:${FABRIC_PASSWD} -s 'http://${FABRIC_ENSEMBLE_ROOT_CONTAINER_NAME}.default.endpoints.cluster.local:8181/jolokia/exec/io.fabric8:type=ZooKeeper/read/!/fabric!/registry!/containers!/alive'`
 
 		if [ -z "$curl" ]; then
