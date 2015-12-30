@@ -89,7 +89,7 @@ elif [ "$FABRIC_ORIGINAL_MASTER" == "false" ] && [ "$FABRIC_JOINED" == "false" ]
 rootEns=`echo $curl | python -c 'import json,sys,re,os
 obj=json.load(sys.stdin)
 for c in obj["value"]["children"]:
-		if re.match(os.environ["FABRIC_ENSEMBLE_CONTAINER_NAME"], c):
+		if re.match(os.environ["FABRIC_ENSEMBLE_ROOT_CONTAINER_NAME"], c):
 					print c
 					'`
 			echo "Root Ensemble is " $rootEns
@@ -123,8 +123,8 @@ for c in obj["value"]["children"]:
 		else
 			sleep 10
 			(( count++ ))
-			if [ $count == 30 ]; then
-				echo "Failed to get a valid fabric health check 5 minutes, fabric join exiting on " $HOSTNAME
+			if [ $count == 60 ]; then
+				echo "Failed to get a valid fabric health check after 10 minutes, fabric join exiting on " $HOSTNAME
 				exit 1
 			fi
 		fi
