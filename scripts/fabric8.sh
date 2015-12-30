@@ -40,7 +40,8 @@ if [ -z $ZK_PASSWD ]; then
 fi
 
 echo "Starting Fuse"
-./bin/fuse $START_ARG &
+./bin/fuse $START_ARG & process=$!
+echo $process
 echo "Sleeping 60"
 sleep 60
 
@@ -49,14 +50,14 @@ if [ "$FABRIC_ORIGINAL_MASTER" == "true" ] && [ "$FABRIC_JOINED" == "false" ]; t
 	while :
 	do
 		echo "Master Client Check"
-		./bin/client & code=$!
-		sleep 15
-		process=`ps -o pid $code | pcregrep '\d+' | tr \\n ' ' | wc -l`
-		return=1
-		echo "Process Return " $process
-		if [ $process -ne 1 ]; then
-			wait $code; return=$?
-		fi
+		./bin/client "version"; return=$?
+		#sleep 15
+		#process=`ps -o pid $code | pcregrep '\d+' | tr \\n ' ' | wc -l`
+		#return=1
+		echo "Process Return " $return
+		#if [ $process -ne 1 ]; then
+		#	wait $code; return=$?
+		#fi
 		if [ $return -eq 0 ]; then
 			./bin/client "fabric:create --wait-for-provisioning --verbose --clean --new-user mrobson --new-user-role admin --new-user-password password --zookeeper-password passwd --resolver manualip --manual-ip fuse-fabric8-ensemble-1.default.endpoints.cluster.local"
 			export FABRIC_JOINED=true
@@ -93,15 +94,15 @@ elif [ "$FABRIC_ORIGINAL_MASTER" == "false" ] && [ "$FABRIC_JOINED" == "false" ]
 			#json=`echo $curl | python -c "import json,sys;obj=json.load(sys.stdin);print obj['value'][1]['healthPercent'];"`
 		fi
 		if [ "$provStatus" == "success" ]; then
-			./bin/client & code=$!
-			sleep 15
-			process=`ps -o pid $code | pcregrep '\d+' | tr \\n ' ' | wc -l`
-			return=1
-			if [ $process -ne 1 ]; then
-				echo "waiting"
-				wait $code; return=$?
-				echo "waited"
-			fi
+			./bin/client "version"; return=$?
+			#sleep 15
+			#process=`ps -o pid $code | pcregrep '\d+' | tr \\n ' ' | wc -l`
+			#return=1
+			#if [ $process -ne 1 ]; then
+			#	echo "waiting"
+			#	wait $code; return=$?
+			#	echo "waited"
+			#fi
 			if [ $return -eq 0 ]; then
 				./bin/client "fabric:join --zookeeper-password passwd --resolver manualip --manual-ip fuse-fabric8-ensemble-4.default.endpoints.cluster.local fuse-fabric8-ensemble-1.default.endpoints.cluster.local:2181"
 				export FABRIC_JOINED=true
