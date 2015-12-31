@@ -103,6 +103,9 @@ for c in obj["value"]["children"]:
 					if [ "$s" != "1" ]; then
 						ENSEMBLE_STRING="$ENSEMBLE_STRING $server"
 					fi
+				else
+					ENSEMBLE_READY="false"
+					break
 				fi
 			else
 				provStatus=notset
