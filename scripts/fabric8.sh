@@ -91,7 +91,7 @@ for c in obj["value"]["children"]:
 			./bin/client "version"; return=$?
 			if [ $return -eq 0 ]; then
 				sleep 15
-				./bin/client "fabric:join --zookeeper-password passwd --resolver manualip --manual-ip ${FABRIC_ENSEMBLE_CONTAINER_NAME}.default.endpoints.cluster.local ${FABRIC_ENSEMBLE_CONTAINER_NAME}.default.endpoints.cluster.local:2181" &
+				./bin/client "fabric:join --zookeeper-password passwd --resolver manualip --manual-ip ${FABRIC_ENSEMBLE_CONTAINER_NAME}.default.endpoints.cluster.local ${FABRIC_ENSEMBLE_ROOT_CONTAINER_NAME}.default.endpoints.cluster.local:2181" &
 				export FABRIC_JOINED=true
 				break
 			else
