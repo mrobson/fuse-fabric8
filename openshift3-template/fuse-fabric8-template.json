@@ -254,12 +254,20 @@
                 },
 		"env": [
 		  {
+	            "name": "FABRIC_ENSEMBLE_BASE_CONTAINER_NAME",
+	            "value": "${FABRIC_ENSEMBLE_BASE_CONTAINER_NAME}"
+                  },
+		  {
 	            "name": "FABRIC_ENSEMBLE_ROOT_CONTAINER_NAME",
 	            "value": "${FABRIC_ENSEMBLE_CONTAINER_NAME1}"
                   },
 		  {
 	            "name": "FABRIC_ENSEMBLE_CONTAINER_NAME",
 	            "value": "${FABRIC_ENSEMBLE_CONTAINER_NAME1}"
+                  },
+		  {
+	            "name": "FABRIC_SIZE",
+	            "value": "${FABRIC_SIZE}"
                   },
 		  {
 	            "name": "FABRIC_ORIGINAL_MASTER",
@@ -1105,6 +1113,11 @@
   ],
   "parameters": [
     {
+      "name": "FABRIC_ENSEMBLE_BASE_CONTAINER_NAME",
+      "description": "Fabric Ensemble Base Container Name",
+      "value": "fuse-fabric8-ensemble-"
+    },
+    {
       "name": "FABRIC_ENSEMBLE_CONTAINER_NAME1",
       "description": "Fabric Ensemble Container 1",
       "value": "fuse-fabric8-ensemble-1"
@@ -1128,6 +1141,11 @@
       "name": "FABRIC_ENSEMBLE_CONTAINER_NAME5",
       "description": "Fabric Ensemble Container 5",
       "value": "fuse-fabric8-ensemble-5"
+    },
+    {
+      "name": "FABRIC_SIZE",
+      "description": "Fabric Size",
+      "value": "5"
     },
     {
       "name": "FABRIC_CONTAINER_IMAGE_NAME",
