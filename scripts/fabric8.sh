@@ -69,6 +69,7 @@ if [ "$FABRIC_ORIGINAL_MASTER" == "true" ] && [ "$FABRIC_JOINED" == "false" ]; t
 	while :
 	do
 	echo "Starting Ensemble Add"
+	ENSEMBLE_STRING=
 	aliveServers=`curl -u ${FABRIC_USER}:${FABRIC_PASSWD} -s 'http://'${FABRIC_ENSEMBLE_ROOT_CONTAINER_NAME}'.default.endpoints.cluster.local:8181/jolokia/exec/io.fabric8:type=ZooKeeper/read/!/fabric!/registry!/containers!/alive'`
 	echo "Alive Server are " $aliveServers
 	for s in $(eval echo "{1..$FABRIC_SIZE}")
