@@ -8,8 +8,7 @@ COPY scripts/fabric8.sh /opt/fuse/jboss-fuse-full/bin/fabric8.sh
 
 RUN \
         chown fuse:fuse /opt/fuse/jboss-fuse-full/bin/fabric8.sh && \
-        chmod +x /opt/fuse/jboss-fuse-full/bin/fabric8.sh && \
-	echo 5 > /proc/sys/net/ipv4/tcp_fin_timeout
+        chmod +x /opt/fuse/jboss-fuse-full/bin/fabric8.sh
 
 USER 1000
 
