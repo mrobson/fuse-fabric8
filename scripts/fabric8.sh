@@ -40,7 +40,7 @@ if [ -z $ZK_PASSWD ]; then
 fi
 
 echo "Starting Fuse"
-nohup ./bin/fuse $START_ARG & process=$!
+./bin/fuse $START_ARG & process=$!
 echo "Sleeping 60"
 sleep 60
 
@@ -53,8 +53,7 @@ if [ "$FABRIC_ORIGINAL_MASTER" == "true" ] && [ "$FABRIC_JOINED" == "false" ]; t
 		echo "Process Return " $return
 		if [ $return -eq 0 ]; then
 			sleep 15
-			./bin/client "fabric:create --wait-for-provisioning --verbose --clean --new-user mrobson --new-user-role admin --new-user-password password --zookeeper-password passwd --resolver manualip --manual-ip ${FABRIC_ENSEMBLE_CONTAINER_NAME}.default.endpoints.cluster.local" &
-			export FABRIC_JOINED=true
+			./bin/client "fabric:create --wait-for-provisioning --verbose --clean --new-user ${FABRIC_USER} --new-user-role ${FABRIC_ROLE} --new-user-password ${FABRIC_PASSWD} --zookeeper-password ${ZK_PASSWD} --resolver manualip --manual-ip ${FABRIC_ENSEMBLE_CONTAINER_NAME}.default.endpoints.cluster.local"
 			break
 		else
 			sleep 5
@@ -91,8 +90,7 @@ for c in obj["value"]["children"]:
 			./bin/client "version"; return=$?
 			if [ $return -eq 0 ]; then
 				sleep 15
-				./bin/client "fabric:join --zookeeper-password passwd --resolver manualip --manual-ip ${FABRIC_ENSEMBLE_CONTAINER_NAME}.default.endpoints.cluster.local ${FABRIC_ENSEMBLE_ROOT_CONTAINER_NAME}.default.endpoints.cluster.local:2181" &
-				export FABRIC_JOINED=true
+				./bin/client "fabric:join --zookeeper-password ${ZK_PASSWD} --resolver manualip --manual-ip ${FABRIC_ENSEMBLE_CONTAINER_NAME}.default.endpoints.cluster.local ${FABRIC_ENSEMBLE_ROOT_CONTAINER_NAME}.default.endpoints.cluster.local:2181"
 				break
 			else
 				sleep 5
