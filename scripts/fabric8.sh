@@ -95,6 +95,7 @@ for c in obj["value"]["children"]:
 
 		if [[ "$alive" =~ "children" ]]; then
 			provCurl=`curl -u ${FABRIC_USER}:${FABRIC_PASSWD} -s 'http://'${FABRIC_ENSEMBLE_ROOT_CONTAINER_NAME}'.default.endpoints.cluster.local:8181/jolokia/exec/io.fabric8:type=ZooKeeper/read/!/fabric!/registry!/containers!/provision!/'${server}'!/result'`
+			echo $provCurl
 
 			if [[ "$provCurl" =~ "\"status\":200" ]]; then
 				provStatus=`echo $provCurl | python -c "import json,sys;obj=json.load(sys.stdin);print obj['value']['stringData'];"`

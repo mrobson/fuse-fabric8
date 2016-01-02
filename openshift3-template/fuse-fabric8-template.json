@@ -237,7 +237,10 @@
             "labels": {
               "name": "${FABRIC_ENSEMBLE_CONTAINER_NAME1}"
             },
-            "generateName": "${FABRIC_ENSEMBLE_CONTAINER_NAME1}-"
+            "generateName": "${FABRIC_ENSEMBLE_CONTAINER_NAME1}",
+            "nodeSelector": {
+              "zone": "south"
+            }
           },
           "spec": {
             "containers": [
