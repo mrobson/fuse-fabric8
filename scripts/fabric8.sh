@@ -110,7 +110,7 @@ for c in obj["value"]["children"]:
 					break
 				fi
 			else
-				provStatus=notset
+				ENSEMBLE_READY="false"
 			fi
 		else 
 			echo "A node is not alive " ${s}
