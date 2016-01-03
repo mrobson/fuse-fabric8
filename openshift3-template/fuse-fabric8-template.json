@@ -1117,13 +1117,13 @@
       "kind": "Service",
       "apiVersion": "v1",
       "metadata": {
-        "name": "${FABRIC_SERVER_CONTAINER_NAME}",
+        "name": "${FABRIC_SERVER_CONTAINER_NAME1}",
         "creationTimestamp": null,
         "labels": {
-          "name": "${FABRIC_SERVER_CONTAINER_NAME}"
+          "name": "${FABRIC_SERVER_CONTAINER_NAME1 }"
         },
 	"annotations": {
-	  "description": "Fuse Fabric8 Server Node Service"
+	  "description": "Fuse Fabric8 Server Node 1 Service"
 	}
       },
       "spec": {
@@ -1186,7 +1186,7 @@
           }
         ],
         "selector": {
-          "name": "${FABRIC_SERVER_CONTAINER_NAME}"
+          "name": "${FABRIC_SERVER_CONTAINER_NAME1}"
         },
         "portalIP": "",
         "type": "ClusterIP",
@@ -1197,17 +1197,17 @@
       "kind": "Route",
       "apiVersion": "v1",
       "metadata": {
-        "name": "${FABRIC_SERVER_CONTAINER_NAME}",
+        "name": "${FABRIC_SERVER_CONTAINER_NAME1}",
         "creationTimestamp": null,
 	"annotations": {
-	  "description": "Fabric Ensemble Node 5 Route"
+	  "description": "Fabric Server Node 1 Route"
 	}
       },
       "spec": {
-          "host": "${FABRIC_SERVER_CONTAINER_NAME}${PUBLIC_DOMAIN}",
+          "host": "${FABRIC_SERVER_CONTAINER_NAME1}${PUBLIC_DOMAIN}",
           "to": {
               "kind": "Service",
-              "name": "${FABRIC_SERVER_CONTAINER_NAME}"
+              "name": "${FABRIC_SERVER_CONTAINER_NAME1}"
           }
       },
       "status": {}
@@ -1216,7 +1216,7 @@
       "kind": "DeploymentConfig",
       "apiVersion": "v1",
       "metadata": {
-        "name": "${FABRIC_SERVER_CONTAINER_NAME}",
+        "name": "${FABRIC_SERVER_CONTAINER_NAME1}",
         "creationTimestamp": null
       },
       "spec": {
@@ -1230,7 +1230,7 @@
             "imageChangeParams": {
               "automatic": true,
               "containerNames": [
-                "${FABRIC_SERVER_CONTAINER_NAME}"
+                "${FABRIC_SERVER_CONTAINER_NAME1}"
               ],
               "from": {
                 "kind": "ImageStreamTag",
@@ -1242,23 +1242,23 @@
             "type": "ConfigChange"
           }
         ],
-        "replicas": 3,
+        "replicas": 1,
         "selector": {
-          "name": "${FABRIC_SERVER_CONTAINER_NAME}"
+          "name": "${FABRIC_SERVER_CONTAINER_NAME1}"
         },
         "template": {
           "metadata": {
-            "name": "${FABRIC_SERVER_CONTAINER_NAME}",
+            "name": "${FABRIC_SERVER_CONTAINER_NAME1}",
             "creationTimestamp": null,
             "labels": {
-              "name": "${FABRIC_SERVER_CONTAINER_NAME}"
+              "name": "${FABRIC_SERVER_CONTAINER_NAME1}"
             },
-            "generateName": "${FABRIC_SERVER_CONTAINER_NAME}-"
+            "generateName": "${FABRIC_SERVER_CONTAINER_NAME1}-"
           },
           "spec": {
             "containers": [
               {
-                "name": "${FABRIC_SERVER_CONTAINER_NAME}",
+                "name": "${FABRIC_SERVER_CONTAINER_NAME1}",
                 "image": "${FABRIC_CONTAINER_IMAGE_NAME}",
                 "resources": {},
                 "terminationMessagePath": "/dev/termination-log",
@@ -1275,7 +1275,409 @@
                   },
 		  {
 	            "name": "FABRIC_ENSEMBLE_CONTAINER_NAME",
-	            "value": "$(HOSTNAME)"
+	            "value": "${FABRIC_SERVER_CONTAINER_NAME1}"
+                  },
+		  {
+	            "name": "FABRIC_ORIGINAL_MASTER",
+	            "value": "false"
+                  },
+		  {
+	            "name": "FABRIC_USER",
+	            "value": "${FABRIC_USER}"
+                  },
+		  {
+	            "name": "FABRIC_PASSWD",
+	            "value": "${FABRIC_PASSWD}"
+                  },
+		  {
+	            "name": "FABRIC_ROLE",
+	            "value": "${FABRIC_ROLE}"
+                  },
+		  {
+	            "name": "ZK_PASSWD",
+	            "value": "${ZK_PASSWD}"
+                  },
+		  {
+	            "name": "FABRIC_START_ARG",
+	            "value": "${FABRIC_START_ARG}"
+                  },
+		  {
+	            "name": "FABRIC_JOINED",
+	            "value": "${FABRIC_JOINED}"
+                  }
+		]
+              }
+            ],
+            "restartPolicy": "Always",
+            "dnsPolicy": "ClusterFirst"
+          }
+        }
+      }
+    },
+    {
+      "kind": "Service",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${FABRIC_SERVER_CONTAINER_NAME2}",
+        "creationTimestamp": null,
+        "labels": {
+          "name": "${FABRIC_SERVER_CONTAINER_NAME2}"
+        },
+	"annotations": {
+	  "description": "Fuse Fabric8 Server Node 2 Service"
+	}
+      },
+      "spec": {
+        "ports": [
+          {
+            "name": "web",
+            "protocol": "TCP",
+            "port": 8181,
+            "targetPort": 8181,
+            "nodePort": 0
+          },
+          {
+            "name": "zk-client",
+            "protocol": "TCP",
+            "port": 2181,
+            "targetPort": 2181,
+            "nodePort": 0
+          },
+          {
+            "name": "zk-client2",
+            "protocol": "TCP",
+            "port": 2182,
+            "targetPort": 2182,
+            "nodePort": 0
+          },
+          {
+            "name": "zk-followers",
+            "protocol": "TCP",
+            "port": 2888,
+            "targetPort": 2888,
+            "nodePort": 0
+          },
+          {
+            "name": "zk-election",
+            "protocol": "TCP",
+            "port": 3888,
+            "targetPort": 3888,
+            "nodePort": 0
+          },
+          {
+            "name": "rmi-server",
+            "protocol": "TCP",
+            "port": 44444,
+            "targetPort": 44444,
+            "nodePort": 0
+          },
+          {
+            "name": "karaf",
+            "protocol": "TCP",
+            "port": 8101,
+            "targetPort": 8101,
+            "nodePort": 0
+          },
+          {
+            "name": "rmi",
+            "protocol": "TCP",
+            "port": 1099,
+            "targetPort": 1099,
+            "nodePort": 0
+          }
+        ],
+        "selector": {
+          "name": "${FABRIC_SERVER_CONTAINER_NAME2}"
+        },
+        "portalIP": "",
+        "type": "ClusterIP",
+        "sessionAffinity": "None"
+      }
+    },
+    {
+      "kind": "Route",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${FABRIC_SERVER_CONTAINER_NAME2}",
+        "creationTimestamp": null,
+	"annotations": {
+	  "description": "Fabric Server Node 2 Route"
+	}
+      },
+      "spec": {
+          "host": "${FABRIC_SERVER_CONTAINER_NAME2}${PUBLIC_DOMAIN}",
+          "to": {
+              "kind": "Service",
+              "name": "${FABRIC_SERVER_CONTAINER_NAME2}"
+          }
+      },
+      "status": {}
+    },
+    {
+      "kind": "DeploymentConfig",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${FABRIC_SERVER_CONTAINER_NAME2}",
+        "creationTimestamp": null
+      },
+      "spec": {
+        "strategy": {
+          "type": "Recreate",
+          "resources": {}
+        },
+        "triggers": [
+          {
+            "type": "ImageChange",
+            "imageChangeParams": {
+              "automatic": true,
+              "containerNames": [
+                "${FABRIC_SERVER_CONTAINER_NAME2}"
+              ],
+              "from": {
+                "kind": "ImageStreamTag",
+                "name": "${FABRIC_CONTAINER_IMAGE_NAME}:${FABRIC_IMAGE_VERSION}"
+              }
+            }
+          },
+          {
+            "type": "ConfigChange"
+          }
+        ],
+        "replicas": 1,
+        "selector": {
+          "name": "${FABRIC_SERVER_CONTAINER_NAME2}"
+        },
+        "template": {
+          "metadata": {
+            "name": "${FABRIC_SERVER_CONTAINER_NAME2}",
+            "creationTimestamp": null,
+            "labels": {
+              "name": "${FABRIC_SERVER_CONTAINER_NAME2}"
+            },
+            "generateName": "${FABRIC_SERVER_CONTAINER_NAME2}-"
+          },
+          "spec": {
+            "containers": [
+              {
+                "name": "${FABRIC_SERVER_CONTAINER_NAME2}",
+                "image": "${FABRIC_CONTAINER_IMAGE_NAME}",
+                "resources": {},
+                "terminationMessagePath": "/dev/termination-log",
+                "imagePullPolicy": "IfNotPresent",
+                "capabilities": {},
+                "securityContext": {
+                  "capabilities": {},
+                  "privileged": false
+                },
+		"env": [
+		  {
+	            "name": "FABRIC_ENSEMBLE_ROOT_CONTAINER_NAME",
+	            "value": "${FABRIC_ENSEMBLE_CONTAINER_NAME1}"
+                  },
+		  {
+	            "name": "FABRIC_ENSEMBLE_CONTAINER_NAME",
+	            "value": "${FABRIC_SERVER_CONTAINER_NAME2}"
+                  },
+		  {
+	            "name": "FABRIC_ORIGINAL_MASTER",
+	            "value": "false"
+                  },
+		  {
+	            "name": "FABRIC_USER",
+	            "value": "${FABRIC_USER}"
+                  },
+		  {
+	            "name": "FABRIC_PASSWD",
+	            "value": "${FABRIC_PASSWD}"
+                  },
+		  {
+	            "name": "FABRIC_ROLE",
+	            "value": "${FABRIC_ROLE}"
+                  },
+		  {
+	            "name": "ZK_PASSWD",
+	            "value": "${ZK_PASSWD}"
+                  },
+		  {
+	            "name": "FABRIC_START_ARG",
+	            "value": "${FABRIC_START_ARG}"
+                  },
+		  {
+	            "name": "FABRIC_JOINED",
+	            "value": "${FABRIC_JOINED}"
+                  }
+		]
+              }
+            ],
+            "restartPolicy": "Always",
+            "dnsPolicy": "ClusterFirst"
+          }
+        }
+      }
+    },
+    {
+      "kind": "Service",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${FABRIC_SERVER_CONTAINER_NAME3}",
+        "creationTimestamp": null,
+        "labels": {
+          "name": "${FABRIC_SERVER_CONTAINER_NAME3}"
+        },
+	"annotations": {
+	  "description": "Fuse Fabric8 Server Node 3 Service"
+	}
+      },
+      "spec": {
+        "ports": [
+          {
+            "name": "web",
+            "protocol": "TCP",
+            "port": 8181,
+            "targetPort": 8181,
+            "nodePort": 0
+          },
+          {
+            "name": "zk-client",
+            "protocol": "TCP",
+            "port": 2181,
+            "targetPort": 2181,
+            "nodePort": 0
+          },
+          {
+            "name": "zk-client2",
+            "protocol": "TCP",
+            "port": 2182,
+            "targetPort": 2182,
+            "nodePort": 0
+          },
+          {
+            "name": "zk-followers",
+            "protocol": "TCP",
+            "port": 2888,
+            "targetPort": 2888,
+            "nodePort": 0
+          },
+          {
+            "name": "zk-election",
+            "protocol": "TCP",
+            "port": 3888,
+            "targetPort": 3888,
+            "nodePort": 0
+          },
+          {
+            "name": "rmi-server",
+            "protocol": "TCP",
+            "port": 44444,
+            "targetPort": 44444,
+            "nodePort": 0
+          },
+          {
+            "name": "karaf",
+            "protocol": "TCP",
+            "port": 8101,
+            "targetPort": 8101,
+            "nodePort": 0
+          },
+          {
+            "name": "rmi",
+            "protocol": "TCP",
+            "port": 1099,
+            "targetPort": 1099,
+            "nodePort": 0
+          }
+        ],
+        "selector": {
+          "name": "${FABRIC_SERVER_CONTAINER_NAME3}"
+        },
+        "portalIP": "",
+        "type": "ClusterIP",
+        "sessionAffinity": "None"
+      }
+    },
+    {
+      "kind": "Route",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${FABRIC_SERVER_CONTAINER_NAME3}",
+        "creationTimestamp": null,
+	"annotations": {
+	  "description": "Fabric Server Node 3 Route"
+	}
+      },
+      "spec": {
+          "host": "${FABRIC_SERVER_CONTAINER_NAME3}${PUBLIC_DOMAIN}",
+          "to": {
+              "kind": "Service",
+              "name": "${FABRIC_SERVER_CONTAINER_NAME3}"
+          }
+      },
+      "status": {}
+    },
+    {
+      "kind": "DeploymentConfig",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${FABRIC_SERVER_CONTAINER_NAME3}",
+        "creationTimestamp": null
+      },
+      "spec": {
+        "strategy": {
+          "type": "Recreate",
+          "resources": {}
+        },
+        "triggers": [
+          {
+            "type": "ImageChange",
+            "imageChangeParams": {
+              "automatic": true,
+              "containerNames": [
+                "${FABRIC_SERVER_CONTAINER_NAME3}"
+              ],
+              "from": {
+                "kind": "ImageStreamTag",
+                "name": "${FABRIC_CONTAINER_IMAGE_NAME}:${FABRIC_IMAGE_VERSION}"
+              }
+            }
+          },
+          {
+            "type": "ConfigChange"
+          }
+        ],
+        "replicas": 1,
+        "selector": {
+          "name": "${FABRIC_SERVER_CONTAINER_NAME3}"
+        },
+        "template": {
+          "metadata": {
+            "name": "${FABRIC_SERVER_CONTAINER_NAME3}",
+            "creationTimestamp": null,
+            "labels": {
+              "name": "${FABRIC_SERVER_CONTAINER_NAME3}"
+            },
+            "generateName": "${FABRIC_SERVER_CONTAINER_NAME3}-"
+          },
+          "spec": {
+            "containers": [
+              {
+                "name": "${FABRIC_SERVER_CONTAINER_NAME3}",
+                "image": "${FABRIC_CONTAINER_IMAGE_NAME}",
+                "resources": {},
+                "terminationMessagePath": "/dev/termination-log",
+                "imagePullPolicy": "IfNotPresent",
+                "capabilities": {},
+                "securityContext": {
+                  "capabilities": {},
+                  "privileged": false
+                },
+		"env": [
+		  {
+	            "name": "FABRIC_ENSEMBLE_ROOT_CONTAINER_NAME",
+	            "value": "${FABRIC_ENSEMBLE_CONTAINER_NAME1}"
+                  },
+		  {
+	            "name": "FABRIC_ENSEMBLE_CONTAINER_NAME",
+	            "value": "${FABRIC_SERVER_CONTAINER_NAME3}"
                   },
 		  {
 	            "name": "FABRIC_ORIGINAL_MASTER",
@@ -1352,9 +1754,19 @@
       "value": "5"
     },
     {
-      "name": "FABRIC_SERVER_CONTAINER_NAME",
-      "description": "Fabric Server Container Name",
-      "value": "fuse-fabric8-server"
+      "name": "FABRIC_SERVER_CONTAINER_NAME1",
+      "description": "Fabric Server Container Name 1",
+      "value": "fuse-fabric8-server-1"
+    },
+    {
+      "name": "FABRIC_SERVER_CONTAINER_NAME2",
+      "description": "Fabric Server Container Name 2",
+      "value": "fuse-fabric8-server-2"
+    },
+    {
+      "name": "FABRIC_SERVER_CONTAINER_NAME3",
+      "description": "Fabric Server Container Name 3",
+      "value": "fuse-fabric8-server-3"
     },
     {
       "name": "FABRIC_CONTAINER_IMAGE_NAME",
