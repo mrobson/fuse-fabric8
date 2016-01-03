@@ -1275,7 +1275,7 @@
                   },
 		  {
 	            "name": "FABRIC_ENSEMBLE_CONTAINER_NAME",
-	            "value": "$HOSTNAME"
+	            "value": "$(HOSTNAME)"
                   },
 		  {
 	            "name": "FABRIC_ORIGINAL_MASTER",
