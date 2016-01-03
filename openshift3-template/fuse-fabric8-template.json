@@ -1113,7 +1113,6 @@
         }
       }
     },
-~~~
     {
       "kind": "Service",
       "apiVersion": "v1",
@@ -1243,7 +1242,7 @@
             "type": "ConfigChange"
           }
         ],
-        "replicas": 1,
+        "replicas": 3,
         "selector": {
           "name": "${FABRIC_SERVER_CONTAINER_NAME}"
         },
@@ -1275,8 +1274,8 @@
 	            "value": "${FABRIC_ENSEMBLE_CONTAINER_NAME1}"
                   },
 		  {
-	            "name": "FABRIC_SERVER_CONTAINER_NAME",
-	            "value": "${FABRIC_SERVER_CONTAINER_NAME}"
+	            "name": "FABRIC_ENSEMBLE_CONTAINER_NAME",
+	            "value": "${HOSTNAME}"
                   },
 		  {
 	            "name": "FABRIC_ORIGINAL_MASTER",
@@ -1315,7 +1314,6 @@
         }
       }
     }
-~~~
   ],
   "parameters": [
     {

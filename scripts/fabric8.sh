@@ -95,9 +95,7 @@ for c in obj["value"]["children"]:
 
 		if [[ "$alive" =~ "children" ]]; then
 			provCurl=`curl -u ${FABRIC_USER}:${FABRIC_PASSWD} -s 'http://'${FABRIC_ENSEMBLE_ROOT_CONTAINER_NAME}'.default.endpoints.cluster.local:8181/jolokia/exec/io.fabric8:type=ZooKeeper/read/!/fabric!/registry!/containers!/provision!/'${server}'!/result'`
-			echo $provCurl
-
-			if [[ "$provCurl" =~ "\"status\":200" ]]; then
+			if [[ "$provCurl" =~ "children" ]]; then
 				provStatus=`echo $provCurl | python -c "import json,sys;obj=json.load(sys.stdin);print obj['value']['stringData'];"`
 				echo "Provisioning Status is " $provStatus
 				if [ "$provStatus" == "success" ]; then
@@ -131,7 +129,7 @@ for c in obj["value"]["children"]:
 		sleep 20
 		(( count++ ))
 		if [ $count == 60 ]; then
-			echo "All Ensemble Server Have Not Become Ready within 20 minutes, exiting"
+			echo "All Ensemble Servers Have Not Become Ready within 20 minutes, exiting"
 			exit 1
 		fi
 	fi
@@ -142,27 +140,14 @@ elif [ "$FABRIC_ORIGINAL_MASTER" == "false" ] && [ "$FABRIC_JOINED" == "false" ]
 	while :
 	do
 		echo "Ensemble Master Check"
-		#curl=`curl -u ${FABRIC_USER}:${FABRIC_PASSWD} -s 'http://'${FABRIC_ENSEMBLE_ROOT_CONTAINER_NAME}'.default.endpoints.cluster.local:8181/jolokia/exec/io.fabric8:type=ZooKeeper/read/!/fabric!/registry!/containers!/alive'`
-		#echo "Alive CURL " $curl
-		#if [ -z "$curl" ]; then
-		#	echo ""
-		#else
-#rootEns=`echo $curl | python -c 'import json,sys,re,os
-#obj=json.load(sys.stdin)
-#for c in obj["value"]["children"]:
-#		if re.match(os.environ["FABRIC_ENSEMBLE_ROOT_CONTAINER_NAME"], c):
-#					print c
-#					'`
 		echo "Root Ensemble is " $FABRIC_ENSEMBLE_ROOT_CONTAINER_NAME
-		#provStatus=`curl -u ${FABRIC_USER}:${FABRIC_PASSWD} -s 'http://'${FABRIC_ENSEMBLE_ROOT_CONTAINER_NAME}'.default.endpoints.cluster.local:8181/jolokia/exec/io.fabric8:type=ZooKeeper/read/!/fabric!/registry!/containers!/provision!/'${FABRIC_ENSEMBLE_ROOT_CONTAINER_NAME}'!/result' | python -c "import json,sys;obj=json.load(sys.stdin);print obj['value']['stringData'];"`
 		provCurl=`curl -u ${FABRIC_USER}:${FABRIC_PASSWD} -s 'http://'${FABRIC_ENSEMBLE_ROOT_CONTAINER_NAME}'.default.endpoints.cluster.local:8181/jolokia/exec/io.fabric8:type=ZooKeeper/read/!/fabric!/registry!/containers!/provision!/'${FABRIC_ENSEMBLE_ROOT_CONTAINER_NAME}'!/result'` 
-		if [[ "$provCurl" =~ "\"status\":200" ]]; then 
+		if [[ "$provCurl" =~ "children" ]]; then 
 			provStatus=`echo $provCurl | python -c "import json,sys;obj=json.load(sys.stdin);print obj['value']['stringData'];"`
 			echo "Provisioning Status is " $provStatus
 		else
 			provStatus=notset
 		fi
-		#fi
 		if [ "$provStatus" == "success" ]; then
 			./bin/client "version"; return=$?
 			if [ $return -eq 0 ]; then
