@@ -1120,7 +1120,7 @@
         "name": "${FABRIC_SERVER_CONTAINER_NAME1}",
         "creationTimestamp": null,
         "labels": {
-          "name": "${FABRIC_SERVER_CONTAINER_NAME1 }"
+          "name": "${FABRIC_SERVER_CONTAINER_NAME1}"
         },
 	"annotations": {
 	  "description": "Fuse Fabric8 Server Node 1 Service"
