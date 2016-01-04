@@ -76,10 +76,12 @@ if [ "$FABRIC_ORIGINAL_MASTER" == "true" ] && [ "$FABRIC_JOINED" == "false" ]; t
 	do
 		export s=$s
 		if [[ "$aliveServers" =~ "children" ]]; then
-eval 'rootEns'${s}=`echo $aliveServers | python -c 'import json,sys,re,os
+eval 'server'${s}=`echo $aliveServers | python -c 'import json,sys,re,os
 obj=json.load(sys.stdin)
 for c in obj["value"]["children"]:
 	if re.match(os.environ["FABRIC_ENSEMBLE_BASE_CONTAINER_NAME"] + os.environ["s"], c):
+		print c
+	elif re.match(os.environ["FABRIC_SERVER_BASE_CONTAINER_NAME"] + os.environ["s"], c):
 		print c
 		'`
 		fi
@@ -88,7 +90,7 @@ for c in obj["value"]["children"]:
 	for s in $(eval echo "{1..$FABRIC_SIZE}")
 	do
 
-	server=$(eval echo \$'rootEns'${s})
+	server=$(eval echo \$'server'${s})
 
 	if [ "$server" ]; then
 		alive=`curl -u ${FABRIC_USER}:${FABRIC_PASSWD} -s 'http://'${FABRIC_ENSEMBLE_ROOT_CONTAINER_NAME}'.default.endpoints.cluster.local:8181/jolokia/exec/io.fabric8:type=ZooKeeper/read/!/fabric!/registry!/containers!/alive!/'${server}''`
@@ -100,7 +102,12 @@ for c in obj["value"]["children"]:
 				echo "Provisioning Status is " $provStatus
 				if [ "$provStatus" == "success" ]; then
 					ENSEMBLE_READY="true"
-					if [ "$s" != "1" ]; then
+					if [[ "$server" =~ "${FABRIC_SERVER_BASE_CONTAINER_NAME}" ]]; then
+						ENSEMBLE_ADD="false"
+					else
+						ENSEMBLE_ADD="true"
+					fi
+					if [ "$server" != "${FABRIC_ENSEMBLE_ROOT_CONTAINER_NAME}" ] && [ "$ENSEMBLE_ADD" == "true" ]; then
 						ENSEMBLE_STRING="$ENSEMBLE_STRING $server"
 					fi
 				else
