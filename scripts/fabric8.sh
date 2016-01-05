@@ -111,6 +111,7 @@ print srvs
 					fi
 				else
 					ENSEMBLE_READY="false"
+					break
 				fi
 			else 
 				echo "A node is not alive " ${s}
