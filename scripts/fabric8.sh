@@ -129,6 +129,10 @@ for c in obj["value"]["children"]:
 	done
 
 	if [ "$ENSEMBLE_READY" == "true" ]; then
+		if [ -z "$ENSEMBLE_STRING" ]; then
+			echo "Ensemble is ready, but only has 1 node.  Do not need to run ensemble-add"
+			break
+		fi
 		echo "Creating ensemble from string " $ENSEMBLE_STRING
 		./bin/client "fabric:ensemble-add -f $ENSEMBLE_STRING"
 		break
