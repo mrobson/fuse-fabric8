@@ -257,10 +257,6 @@
                 },
 		"env": [
 		  {
-	            "name": "FABRIC_ENSEMBLE_BASE_CONTAINER_NAME",
-	            "value": "${FABRIC_ENSEMBLE_BASE_CONTAINER_NAME}"
-                  },
-		  {
 	            "name": "FABRIC_SERVER_BASE_CONTAINER_NAME",
 	            "value": "${FABRIC_SERVER_BASE_CONTAINER_NAME}"
                   },
@@ -1120,11 +1116,6 @@
   ],
   "parameters": [
     {
-      "name": "FABRIC_ENSEMBLE_BASE_CONTAINER_NAME",
-      "description": "Fabric Ensemble Base Container Name",
-      "value": "fuse-fabric8-ensemble-"
-    },
-    {
       "name": "FABRIC_SERVER_BASE_CONTAINER_NAME",
       "description": "Fabric Server Base Container Name",
       "value": "fuse-fabric8-server-"
@@ -1152,12 +1143,12 @@
     {
       "name": "FABRIC_SERVER_CONTAINER_NAME1",
       "description": "Fabric Server Container Name 1",
-      "value": "fuse-fabric8-server-4"
+      "value": "fuse-fabric8-server-1"
     },
     {
       "name": "FABRIC_SERVER_CONTAINER_NAME2",
       "description": "Fabric Server Container Name 2",
-      "value": "fuse-fabric8-server-5"
+      "value": "fuse-fabric8-server-2"
     },
     {
       "name": "FABRIC_CONTAINER_IMAGE_NAME",
