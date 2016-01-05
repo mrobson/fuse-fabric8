@@ -72,9 +72,6 @@ if [ "$FABRIC_ORIGINAL_MASTER" == "true" ] && [ "$FABRIC_JOINED" == "false" ]; t
 	ENSEMBLE_STRING=
 	aliveServers=`curl -u ${FABRIC_USER}:${FABRIC_PASSWD} -s 'http://'${FABRIC_ENSEMBLE_ROOT_CONTAINER_NAME}'.default.endpoints.cluster.local:8181/jolokia/exec/io.fabric8:type=ZooKeeper/read/!/fabric!/registry!/containers!/alive'`
 	echo "Alive Server are " $aliveServers
-	#for s in $(eval echo "{1..$FABRIC_SIZE}")
-	#do
-	#	export s=$s
 	if [[ "$aliveServers" =~ "children" ]]; then
 servers=($(echo $aliveServers | python -c 'import json,sys,re,os
 obj=json.load(sys.stdin)
@@ -84,49 +81,50 @@ for c in obj["value"]["children"]:
 print srvs
 	'))
 	fi
-	#done
 
-	#for s in $(eval echo "{1..$FABRIC_SIZE}")
-	for server in ${servers[@]}
-	do
+	if [ ${#servers[@]} -eq $FABRIC_SIZE ]; then
+		for server in ${servers[@]}
+		do
 
-	#server=$(eval echo \$'server'${s})
+		if [ "$server" ]; then
+			alive=`curl -u ${FABRIC_USER}:${FABRIC_PASSWD} -s 'http://'${FABRIC_ENSEMBLE_ROOT_CONTAINER_NAME}'.default.endpoints.cluster.local:8181/jolokia/exec/io.fabric8:type=ZooKeeper/read/!/fabric!/registry!/containers!/alive!/'${server}''`
 
-	if [ "$server" ]; then
-		alive=`curl -u ${FABRIC_USER}:${FABRIC_PASSWD} -s 'http://'${FABRIC_ENSEMBLE_ROOT_CONTAINER_NAME}'.default.endpoints.cluster.local:8181/jolokia/exec/io.fabric8:type=ZooKeeper/read/!/fabric!/registry!/containers!/alive!/'${server}''`
-
-		if [[ "$alive" =~ "children" ]]; then
-			provCurl=`curl -u ${FABRIC_USER}:${FABRIC_PASSWD} -s 'http://'${FABRIC_ENSEMBLE_ROOT_CONTAINER_NAME}'.default.endpoints.cluster.local:8181/jolokia/exec/io.fabric8:type=ZooKeeper/read/!/fabric!/registry!/containers!/provision!/'${server}'!/result'`
-			if [[ "$provCurl" =~ "children" ]]; then
-				provStatus=`echo $provCurl | python -c "import json,sys;obj=json.load(sys.stdin);print obj['value']['stringData'];"`
-				echo "Provisioning Status is " $provStatus
-				if [ "$provStatus" == "success" ]; then
-					ENSEMBLE_READY="true"
-					if [[ "$server" =~ "${FABRIC_SERVER_BASE_CONTAINER_NAME}" ]]; then
-						ENSEMBLE_ADD="false"
+			if [[ "$alive" =~ "children" ]]; then
+				provCurl=`curl -u ${FABRIC_USER}:${FABRIC_PASSWD} -s 'http://'${FABRIC_ENSEMBLE_ROOT_CONTAINER_NAME}'.default.endpoints.cluster.local:8181/jolokia/exec/io.fabric8:type=ZooKeeper/read/!/fabric!/registry!/containers!/provision!/'${server}'!/result'`
+				if [[ "$provCurl" =~ "children" ]]; then
+					provStatus=`echo $provCurl | python -c "import json,sys;obj=json.load(sys.stdin);print obj['value']['stringData'];"`
+					echo "Provisioning Status is " $provStatus
+					if [ "$provStatus" == "success" ]; then
+						ENSEMBLE_READY="true"
+						if [[ "$server" =~ "${FABRIC_SERVER_BASE_CONTAINER_NAME}" ]]; then
+							ENSEMBLE_ADD="false"
+						else
+							ENSEMBLE_ADD="true"
+						fi
+						if [ "$server" != "${FABRIC_ENSEMBLE_ROOT_CONTAINER_NAME}" ] && [ "$ENSEMBLE_ADD" == "true" ]; then
+							ENSEMBLE_STRING="$ENSEMBLE_STRING $server"
+						fi
 					else
-						ENSEMBLE_ADD="true"
-					fi
-					if [ "$server" != "${FABRIC_ENSEMBLE_ROOT_CONTAINER_NAME}" ] && [ "$ENSEMBLE_ADD" == "true" ]; then
-						ENSEMBLE_STRING="$ENSEMBLE_STRING $server"
+						ENSEMBLE_READY="false"
+						break
 					fi
 				else
 					ENSEMBLE_READY="false"
-					break
 				fi
-			else
+			else 
+				echo "A node is not alive " ${s}
 				ENSEMBLE_READY="false"
+				break
 			fi
-		else 
-			echo "A node is not alive " ${s}
+		else
 			ENSEMBLE_READY="false"
 			break
 		fi
+		done
 	else
 		ENSEMBLE_READY="false"
 		break
 	fi
-	done
 
 	if [ "$ENSEMBLE_READY" == "true" ]; then
 		if [ -z "$ENSEMBLE_STRING" ]; then
