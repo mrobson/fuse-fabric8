@@ -66,6 +66,7 @@ if [ "$FABRIC_ORIGINAL_MASTER" == "true" ] && [ "$FABRIC_JOINED" == "false" ]; t
 		fi
 	done
 	echo "Finished Fabric Creation"
+	count=0
 	while :
 	do
 	echo "Starting Ensemble Add"
@@ -123,7 +124,6 @@ print srvs
 		done
 	else
 		ENSEMBLE_READY="false"
-		break
 	fi
 
 	if [ "$ENSEMBLE_READY" == "true" ]; then
