@@ -6,7 +6,7 @@ OpenShift 3.1 Templates
 There are 2 types of included templates, ones without a PersistentVolume for a mavan localRepository and ones with a PersistentVolume for a mavan localRepository.
 
 To use the PV templates, you must have an NFS server which is accessible from within your PODs and configure it in the template. The variable PV_NFS_PATH is used both for the export directory and local directory name.
-
+```
 {
     "name": "PV_NFS_PATH",
     "description": "NFS Mount Path for the PersistentVolume",
@@ -17,7 +17,7 @@ To use the PV templates, you must have an NFS server which is accessible from wi
     "description": "NFS Server for the PersistentVolume",
     "value": "nfsserver.example.com"
 }
-
+```
 fuse-fabric8-template-1ens-1srv.json
 ------------------------------------
 * 1 Ensemble Server
