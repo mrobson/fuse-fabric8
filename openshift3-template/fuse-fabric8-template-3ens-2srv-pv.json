@@ -2,15 +2,50 @@
   "kind": "Template",
   "apiVersion": "v1",
   "metadata": {
-    "name": "fuse-fabric8-6.2.1.84-1e-2s",
+    "name": "fuse-fabric8-6.2.1.84-3e-2s-pv",
     "creationTimestamp": null,
     "annotations": {
-      "description": "Fuse fabric8 template for 1 ensemble server and 2 fabric servers",
+      "description": "Fuse fabric8 template for 3 ensemble servers, 2 fabric servers and a NFS PersistentVolume for a fabric8 localRepository",
       "iconClass": "icon-fuse",
       "tags": "fuse,fabric8,openshift3"
     }
   },
   "objects": [
+    {
+      "kind": "PersistentVolume",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${PV_NAME}"
+      },
+      "spec": {
+        "capacity": {
+            "storage": "${VOLUME_SIZE}"
+            },
+        "accessModes": [ "ReadOnlyMany" ],
+        "nfs": {
+            "path": "${PV_NFS_PATH}",
+            "server": "${PV_NFS_SERVER}"
+        },
+        "persistentVolumeReclaimPolicy": "Recycle"
+      }
+    },
+    {
+      "kind": "PersistentVolumeClaim",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${PVC_NAME}"
+      },
+      "spec": {
+        "accessModes": [
+          "ReadOnlyMany"
+        ],
+        "resources": {
+          "requests": {
+            "storage": "${VOLUME_SIZE}"
+          }
+        }
+      }
+    },
     {
       "kind": "ImageStream",
       "apiVersion": "v1",
@@ -243,6 +278,14 @@
             }
           },
           "spec": {
+            "volumes": [
+                {
+                    "name": "${MAVEN_VOLUME_NAME}",
+                    "persistentVolumeClaim": {
+                        "claimName": "${PVC_NAME}"
+                    }
+                }
+            ],
             "containers": [
               {
                 "name": "${FABRIC_ENSEMBLE_CONTAINER_NAME1}",
@@ -297,10 +340,446 @@
 	            "value": "${FABRIC_START_ARG}"
                   },
 		  {
-	            "name": "FABRIC_JOINED",
-	            "value": "${FABRIC_JOINED}"
+	            "name": "MAVEN_LOCAL_REPO",
+	            "value": "${PV_NFS_PATH}"
                   }
-		]
+		],
+                "volumeMounts": [
+                    {
+                        "name": "${MAVEN_VOLUME_NAME}",
+                        "mountPath": "${PV_NFS_PATH}"
+                    }
+                ]
+              }
+            ],
+            "restartPolicy": "Always",
+            "dnsPolicy": "ClusterFirst"
+          }
+        }
+      }
+    },
+    {
+      "kind": "Service",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${FABRIC_ENSEMBLE_CONTAINER_NAME2}",
+        "creationTimestamp": null,
+        "labels": {
+          "name": "${FABRIC_ENSEMBLE_CONTAINER_NAME2}"
+        },
+	"annotations": {
+	  "description": "Fuse Fabric8 Ensemble Node 2 Service"
+	}
+      },
+      "spec": {
+        "ports": [
+          {
+            "name": "web",
+            "protocol": "TCP",
+            "port": 8181,
+            "targetPort": 8181,
+            "nodePort": 0
+          },
+          {
+            "name": "zk-client",
+            "protocol": "TCP",
+            "port": 2181,
+            "targetPort": 2181,
+            "nodePort": 0
+          },
+          {
+            "name": "zk-client2",
+            "protocol": "TCP",
+            "port": 2182,
+            "targetPort": 2182,
+            "nodePort": 0
+          },
+          {
+            "name": "zk-followers",
+            "protocol": "TCP",
+            "port": 2888,
+            "targetPort": 2888,
+            "nodePort": 0
+          },
+          {
+            "name": "zk-election",
+            "protocol": "TCP",
+            "port": 3888,
+            "targetPort": 3888,
+            "nodePort": 0
+          },
+          {
+            "name": "rmi-server",
+            "protocol": "TCP",
+            "port": 44444,
+            "targetPort": 44444,
+            "nodePort": 0
+          },
+          {
+            "name": "karaf",
+            "protocol": "TCP",
+            "port": 8101,
+            "targetPort": 8101,
+            "nodePort": 0
+          },
+          {
+            "name": "rmi",
+            "protocol": "TCP",
+            "port": 1099,
+            "targetPort": 1099,
+            "nodePort": 0
+          }
+        ],
+        "selector": {
+          "name": "${FABRIC_ENSEMBLE_CONTAINER_NAME2}"
+        },
+        "portalIP": "",
+        "type": "ClusterIP",
+        "sessionAffinity": "None"
+      }
+    },
+    {
+      "kind": "Route",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${FABRIC_ENSEMBLE_CONTAINER_NAME2}",
+        "creationTimestamp": null,
+	"annotations": {
+	  "description": "Fabric Ensemble Node 2 Route"
+	}
+      },
+      "spec": {
+          "host": "${FABRIC_ENSEMBLE_CONTAINER_NAME2}${PUBLIC_DOMAIN}",
+          "to": {
+              "kind": "Service",
+              "name": "${FABRIC_ENSEMBLE_CONTAINER_NAME2}"
+          }
+      },
+      "status": {}
+    },
+    {
+      "kind": "DeploymentConfig",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${FABRIC_ENSEMBLE_CONTAINER_NAME2}",
+        "creationTimestamp": null
+      },
+      "spec": {
+        "strategy": {
+          "type": "Recreate",
+          "resources": {}
+        },
+        "triggers": [
+          {
+            "type": "ImageChange",
+            "imageChangeParams": {
+              "automatic": true,
+              "containerNames": [
+                "${FABRIC_ENSEMBLE_CONTAINER_NAME2}"
+              ],
+              "from": {
+                "kind": "ImageStreamTag",
+                "name": "${FABRIC_CONTAINER_IMAGE_NAME}:${FABRIC_IMAGE_VERSION}"
+              }
+            }
+          },
+          {
+            "type": "ConfigChange"
+          }
+        ],
+        "replicas": 1,
+        "selector": {
+          "name": "${FABRIC_ENSEMBLE_CONTAINER_NAME2}"
+        },
+        "template": {
+          "metadata": {
+            "name": "${FABRIC_ENSEMBLE_CONTAINER_NAME2}",
+            "creationTimestamp": null,
+            "labels": {
+              "name": "${FABRIC_ENSEMBLE_CONTAINER_NAME2}"
+            },
+            "generateName": "${FABRIC_ENSEMBLE_CONTAINER_NAME2}-"
+          },
+          "spec": {
+            "volumes": [
+                {
+                    "name": "${MAVEN_VOLUME_NAME}",
+                    "persistentVolumeClaim": {
+                        "claimName": "${PVC_NAME}"
+                    }
+                }
+            ],
+            "containers": [
+              {
+                "name": "${FABRIC_ENSEMBLE_CONTAINER_NAME2}",
+                "image": "${FABRIC_CONTAINER_IMAGE_NAME}",
+                "resources": {},
+                "terminationMessagePath": "/dev/termination-log",
+                "imagePullPolicy": "IfNotPresent",
+                "capabilities": {},
+                "securityContext": {
+                  "capabilities": {},
+                  "privileged": false
+                },
+		"env": [
+		  {
+	            "name": "FABRIC_ENSEMBLE_ROOT_CONTAINER_NAME",
+	            "value": "${FABRIC_ENSEMBLE_CONTAINER_NAME1}"
+                  },
+		  {
+	            "name": "FABRIC_ENSEMBLE_CONTAINER_NAME",
+	            "value": "${FABRIC_ENSEMBLE_CONTAINER_NAME2}"
+                  },
+		  {
+	            "name": "FABRIC_ORIGINAL_MASTER",
+	            "value": "false"
+                  },
+		  {
+	            "name": "FABRIC_USER",
+	            "value": "${FABRIC_USER}"
+                  },
+		  {
+	            "name": "FABRIC_PASSWD",
+	            "value": "${FABRIC_PASSWD}"
+                  },
+		  {
+	            "name": "FABRIC_ROLE",
+	            "value": "${FABRIC_ROLE}"
+                  },
+		  {
+	            "name": "ZK_PASSWD",
+	            "value": "${ZK_PASSWD}"
+                  },
+		  {
+	            "name": "FABRIC_START_ARG",
+	            "value": "${FABRIC_START_ARG}"
+                  },
+		  {
+	            "name": "MAVEN_LOCAL_REPO",
+	            "value": "${PV_NFS_PATH}"
+                  }
+		],
+                "volumeMounts": [
+                    {
+                        "name": "${MAVEN_VOLUME_NAME}",
+                        "mountPath": "${PV_NFS_PATH}"
+                    }
+                ]
+              }
+            ],
+            "restartPolicy": "Always",
+            "dnsPolicy": "ClusterFirst"
+          }
+        }
+      }
+    },
+    {
+      "kind": "Service",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${FABRIC_ENSEMBLE_CONTAINER_NAME3}",
+        "creationTimestamp": null,
+        "labels": {
+          "name": "${FABRIC_ENSEMBLE_CONTAINER_NAME3}"
+        },
+	"annotations": {
+	  "description": "Fuse Fabric8 Ensemble Node 3 Service"
+	}
+      },
+      "spec": {
+        "ports": [
+          {
+            "name": "web",
+            "protocol": "TCP",
+            "port": 8181,
+            "targetPort": 8181,
+            "nodePort": 0
+          },
+          {
+            "name": "zk-client",
+            "protocol": "TCP",
+            "port": 2181,
+            "targetPort": 2181,
+            "nodePort": 0
+          },
+          {
+            "name": "zk-client2",
+            "protocol": "TCP",
+            "port": 2182,
+            "targetPort": 2182,
+            "nodePort": 0
+          },
+          {
+            "name": "zk-followers",
+            "protocol": "TCP",
+            "port": 2888,
+            "targetPort": 2888,
+            "nodePort": 0
+          },
+          {
+            "name": "zk-election",
+            "protocol": "TCP",
+            "port": 3888,
+            "targetPort": 3888,
+            "nodePort": 0
+          },
+          {
+            "name": "rmi-server",
+            "protocol": "TCP",
+            "port": 44444,
+            "targetPort": 44444,
+            "nodePort": 0
+          },
+          {
+            "name": "karaf",
+            "protocol": "TCP",
+            "port": 8101,
+            "targetPort": 8101,
+            "nodePort": 0
+          },
+          {
+            "name": "rmi",
+            "protocol": "TCP",
+            "port": 1099,
+            "targetPort": 1099,
+            "nodePort": 0
+          }
+        ],
+        "selector": {
+          "name": "${FABRIC_ENSEMBLE_CONTAINER_NAME3}"
+        },
+        "portalIP": "",
+        "type": "ClusterIP",
+        "sessionAffinity": "None"
+      }
+    },
+    {
+      "kind": "Route",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${FABRIC_ENSEMBLE_CONTAINER_NAME3}",
+        "creationTimestamp": null,
+	"annotations": {
+	  "description": "Fabric Ensemble Node 3 Route"
+	}
+      },
+      "spec": {
+          "host": "${FABRIC_ENSEMBLE_CONTAINER_NAME3}${PUBLIC_DOMAIN}",
+          "to": {
+              "kind": "Service",
+              "name": "${FABRIC_ENSEMBLE_CONTAINER_NAME3}"
+          }
+      },
+      "status": {}
+    },
+    {
+      "kind": "DeploymentConfig",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${FABRIC_ENSEMBLE_CONTAINER_NAME3}",
+        "creationTimestamp": null
+      },
+      "spec": {
+        "strategy": {
+          "type": "Recreate",
+          "resources": {}
+        },
+        "triggers": [
+          {
+            "type": "ImageChange",
+            "imageChangeParams": {
+              "automatic": true,
+              "containerNames": [
+                "${FABRIC_ENSEMBLE_CONTAINER_NAME3}"
+              ],
+              "from": {
+                "kind": "ImageStreamTag",
+                "name": "${FABRIC_CONTAINER_IMAGE_NAME}:${FABRIC_IMAGE_VERSION}"
+              }
+            }
+          },
+          {
+            "type": "ConfigChange"
+          }
+        ],
+        "replicas": 1,
+        "selector": {
+          "name": "${FABRIC_ENSEMBLE_CONTAINER_NAME3}"
+        },
+        "template": {
+          "metadata": {
+            "name": "${FABRIC_ENSEMBLE_CONTAINER_NAME3}",
+            "creationTimestamp": null,
+            "labels": {
+              "name": "${FABRIC_ENSEMBLE_CONTAINER_NAME3}"
+            },
+            "generateName": "${FABRIC_ENSEMBLE_CONTAINER_NAME3}-"
+          },
+          "spec": {
+            "volumes": [
+                {
+                    "name": "${MAVEN_VOLUME_NAME}",
+                    "persistentVolumeClaim": {
+                        "claimName": "${PVC_NAME}"
+                    }
+                }
+            ],
+            "containers": [
+              {
+                "name": "${FABRIC_ENSEMBLE_CONTAINER_NAME3}",
+                "image": "${FABRIC_CONTAINER_IMAGE_NAME}",
+                "resources": {},
+                "terminationMessagePath": "/dev/termination-log",
+                "imagePullPolicy": "IfNotPresent",
+                "capabilities": {},
+                "securityContext": {
+                  "capabilities": {},
+                  "privileged": false
+                },
+		"env": [
+		  {
+	            "name": "FABRIC_ENSEMBLE_ROOT_CONTAINER_NAME",
+	            "value": "${FABRIC_ENSEMBLE_CONTAINER_NAME1}"
+                  },
+		  {
+	            "name": "FABRIC_ENSEMBLE_CONTAINER_NAME",
+	            "value": "${FABRIC_ENSEMBLE_CONTAINER_NAME3}"
+                  },
+		  {
+	            "name": "FABRIC_ORIGINAL_MASTER",
+	            "value": "false"
+                  },
+		  {
+	            "name": "FABRIC_USER",
+	            "value": "${FABRIC_USER}"
+                  },
+		  {
+	            "name": "FABRIC_PASSWD",
+	            "value": "${FABRIC_PASSWD}"
+                  },
+		  {
+	            "name": "FABRIC_ROLE",
+	            "value": "${FABRIC_ROLE}"
+                  },
+		  {
+	            "name": "ZK_PASSWD",
+	            "value": "${ZK_PASSWD}"
+                  },
+		  {
+	            "name": "FABRIC_START_ARG",
+	            "value": "${FABRIC_START_ARG}"
+                  },
+		  {
+	            "name": "MAVEN_LOCAL_REPO",
+	            "value": "${PV_NFS_PATH}"
+                  }
+		],
+                "volumeMounts": [
+                    {
+                        "name": "${MAVEN_VOLUME_NAME}",
+                        "mountPath": "${PV_NFS_PATH}"
+                    }
+                ]
               }
             ],
             "restartPolicy": "Always",
@@ -452,6 +931,14 @@
             "generateName": "${FABRIC_SERVER_CONTAINER_NAME1}-"
           },
           "spec": {
+            "volumes": [
+                {
+                    "name": "${MAVEN_VOLUME_NAME}",
+                    "persistentVolumeClaim": {
+                        "claimName": "${PVC_NAME}"
+                    }
+                }
+            ],
             "containers": [
               {
                 "name": "${FABRIC_SERVER_CONTAINER_NAME1}",
@@ -498,10 +985,16 @@
 	            "value": "${FABRIC_START_ARG}"
                   },
 		  {
-	            "name": "FABRIC_JOINED",
-	            "value": "${FABRIC_JOINED}"
+	            "name": "MAVEN_LOCAL_REPO",
+	            "value": "${PV_NFS_PATH}"
                   }
-		]
+		],
+                "volumeMounts": [
+                    {
+                        "name": "${MAVEN_VOLUME_NAME}",
+                        "mountPath": "${PV_NFS_PATH}"
+                    }
+                ]
               }
             ],
             "restartPolicy": "Always",
@@ -653,6 +1146,14 @@
             "generateName": "${FABRIC_SERVER_CONTAINER_NAME2}-"
           },
           "spec": {
+            "volumes": [
+                {
+                    "name": "${MAVEN_VOLUME_NAME}",
+                    "persistentVolumeClaim": {
+                        "claimName": "${PVC_NAME}"
+                    }
+                }
+            ],
             "containers": [
               {
                 "name": "${FABRIC_SERVER_CONTAINER_NAME2}",
@@ -699,10 +1200,16 @@
 	            "value": "${FABRIC_START_ARG}"
                   },
 		  {
-	            "name": "FABRIC_JOINED",
-	            "value": "${FABRIC_JOINED}"
+	            "name": "MAVEN_LOCAL_REPO",
+	            "value": "${PV_NFS_PATH}"
                   }
-		]
+		],
+                "volumeMounts": [
+                    {
+                        "name": "${MAVEN_VOLUME_NAME}",
+                        "mountPath": "${PV_NFS_PATH}"
+                    }
+                ]
               }
             ],
             "restartPolicy": "Always",
@@ -724,9 +1231,19 @@
       "value": "fuse-fabric8-ensemble-1"
     },
     {
+      "name": "FABRIC_ENSEMBLE_CONTAINER_NAME2",
+      "description": "Fabric Ensemble Container 2",
+      "value": "fuse-fabric8-ensemble-2"
+    },
+    {
+      "name": "FABRIC_ENSEMBLE_CONTAINER_NAME3",
+      "description": "Fabric Ensemble Container 3",
+      "value": "fuse-fabric8-ensemble-3"
+    },
+    {
       "name": "FABRIC_SIZE",
       "description": "Fabric Size",
-      "value": "3"
+      "value": "5"
     },
     {
       "name": "FABRIC_SERVER_CONTAINER_NAME1",
@@ -794,12 +1311,37 @@
       "value": "server"
     },
     {
-      "name": "FABRIC_JOINED",
-      "description": "Has the Server joined the fabric already?",
-      "value": "false"
+      "name": "PV_NAME",
+      "description": "Name of the NFS PersistentVolume",
+      "value": "maven-pv"
+    },
+    {
+      "name": "PV_NFS_PATH",
+      "description": "NFS Mount Path for the PersistentVolume",
+      "value": "/mnt/maven"
+    },
+    {
+      "name": "PV_NFS_SERVER",
+      "description": "NFS Server for the PersistentVolume",
+      "value": "fusefabric1.gsslab.rdu2.redhat.com"
+    },
+    {
+      "name": "PVC_NAME",
+      "description": "Name of the NFC PersistentVolumeClaim",
+      "value": "maven-pvc"
+    },
+    {
+      "name": "VOLUME_SIZE",
+      "description": "Size of the NFS Volume",
+      "value": "5Gi"
+    },
+    {
+      "name": "MAVEN_VOLUME_NAME",
+      "description": "Name of the volume in the DeploymentConfig",
+      "value": "fabric-maven-volume"
     }
   ],
   "labels": {
-    "template": "fuse-fabric8-6.2.1.84-1e-2s"
+    "template": "fuse-fabric8-6.2.1.84-3e-2s-pv"
   }
 }

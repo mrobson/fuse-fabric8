@@ -2,10 +2,10 @@
   "kind": "Template",
   "apiVersion": "v1",
   "metadata": {
-    "name": "fuse-fabric8-6.2.1.84",
+    "name": "fuse-fabric8-6.2.1.84-1e-1s",
     "creationTimestamp": null,
     "annotations": {
-      "description": "Fuse fabric8 template",
+      "description": "Fuse fabric8 template for 1 ensemble server and 1 fabric server",
       "iconClass": "icon-fuse",
       "tags": "fuse,fabric8,openshift3"
     }
@@ -594,6 +594,6 @@
     }
   ],
   "labels": {
-    "template": "fuse-fabric8-6.2.1.84"
+    "template": "fuse-fabric8-6.2.1.84-1e-1s"
   }
 }

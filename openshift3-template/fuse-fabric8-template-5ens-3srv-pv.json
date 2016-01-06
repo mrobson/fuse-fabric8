@@ -2,15 +2,50 @@
   "kind": "Template",
   "apiVersion": "v1",
   "metadata": {
-    "name": "fuse-fabric8-6.2.1.84-5e-3s",
+    "name": "fuse-fabric8-6.2.1.84-5e-3s-pv",
     "creationTimestamp": null,
     "annotations": {
-      "description": "Fuse fabric8 template for 5 ensemble servers and 3 fabric server",
+      "description": "Fuse fabric8 template for 5 ensemble servers, 3 fabric servers and a NFS PersistentVolume for a fabric8 localRepository",
       "iconClass": "icon-fuse",
       "tags": "fuse,fabric8,openshift3"
     }
   },
   "objects": [
+    {
+      "kind": "PersistentVolume",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${PV_NAME}"
+      },
+      "spec": {
+        "capacity": {
+            "storage": "${VOLUME_SIZE}"
+            },
+        "accessModes": [ "ReadOnlyMany" ],
+        "nfs": {
+            "path": "${PV_NFS_PATH}",
+            "server": "${PV_NFS_SERVER}"
+        },
+        "persistentVolumeReclaimPolicy": "Recycle"
+      }
+    },
+    {
+      "kind": "PersistentVolumeClaim",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${PVC_NAME}"
+      },
+      "spec": {
+        "accessModes": [
+          "ReadOnlyMany"
+        ],
+        "resources": {
+          "requests": {
+            "storage": "${VOLUME_SIZE}"
+          }
+        }
+      }
+    },
     {
       "kind": "ImageStream",
       "apiVersion": "v1",
@@ -243,6 +278,14 @@
             }
           },
           "spec": {
+            "volumes": [
+                {
+                    "name": "${MAVEN_VOLUME_NAME}",
+                    "persistentVolumeClaim": {
+                        "claimName": "${PVC_NAME}"
+                    }
+                }
+            ],
             "containers": [
               {
                 "name": "${FABRIC_ENSEMBLE_CONTAINER_NAME1}",
@@ -297,10 +340,16 @@
 	            "value": "${FABRIC_START_ARG}"
                   },
 		  {
-	            "name": "FABRIC_JOINED",
-	            "value": "${FABRIC_JOINED}"
+	            "name": "MAVEN_LOCAL_REPO",
+	            "value": "${PV_NFS_PATH}"
                   }
-		]
+		],
+                "volumeMounts": [
+                    {
+                        "name": "${MAVEN_VOLUME_NAME}",
+                        "mountPath": "${PV_NFS_PATH}"
+                    }
+                ]
               }
             ],
             "restartPolicy": "Always",
@@ -452,6 +501,14 @@
             "generateName": "${FABRIC_ENSEMBLE_CONTAINER_NAME2}-"
           },
           "spec": {
+            "volumes": [
+                {
+                    "name": "${MAVEN_VOLUME_NAME}",
+                    "persistentVolumeClaim": {
+                        "claimName": "${PVC_NAME}"
+                    }
+                }
+            ],
             "containers": [
               {
                 "name": "${FABRIC_ENSEMBLE_CONTAINER_NAME2}",
@@ -498,10 +555,16 @@
 	            "value": "${FABRIC_START_ARG}"
                   },
 		  {
-	            "name": "FABRIC_JOINED",
-	            "value": "${FABRIC_JOINED}"
+	            "name": "MAVEN_LOCAL_REPO",
+	            "value": "${PV_NFS_PATH}"
                   }
-		]
+		],
+                "volumeMounts": [
+                    {
+                        "name": "${MAVEN_VOLUME_NAME}",
+                        "mountPath": "${PV_NFS_PATH}"
+                    }
+                ]
               }
             ],
             "restartPolicy": "Always",
@@ -653,6 +716,14 @@
             "generateName": "${FABRIC_ENSEMBLE_CONTAINER_NAME3}-"
           },
           "spec": {
+            "volumes": [
+                {
+                    "name": "${MAVEN_VOLUME_NAME}",
+                    "persistentVolumeClaim": {
+                        "claimName": "${PVC_NAME}"
+                    }
+                }
+            ],
             "containers": [
               {
                 "name": "${FABRIC_ENSEMBLE_CONTAINER_NAME3}",
@@ -699,10 +770,16 @@
 	            "value": "${FABRIC_START_ARG}"
                   },
 		  {
-	            "name": "FABRIC_JOINED",
-	            "value": "${FABRIC_JOINED}"
+	            "name": "MAVEN_LOCAL_REPO",
+	            "value": "${PV_NFS_PATH}"
                   }
-		]
+		],
+                "volumeMounts": [
+                    {
+                        "name": "${MAVEN_VOLUME_NAME}",
+                        "mountPath": "${PV_NFS_PATH}"
+                    }
+                ]
               }
             ],
             "restartPolicy": "Always",
@@ -854,6 +931,14 @@
             "generateName": "${FABRIC_ENSEMBLE_CONTAINER_NAME4}-"
           },
           "spec": {
+            "volumes": [
+                {
+                    "name": "${MAVEN_VOLUME_NAME}",
+                    "persistentVolumeClaim": {
+                        "claimName": "${PVC_NAME}"
+                    }
+                }
+            ],
             "containers": [
               {
                 "name": "${FABRIC_ENSEMBLE_CONTAINER_NAME4}",
@@ -900,10 +985,16 @@
 	            "value": "${FABRIC_START_ARG}"
                   },
 		  {
-	            "name": "FABRIC_JOINED",
-	            "value": "${FABRIC_JOINED}"
+	            "name": "MAVEN_LOCAL_REPO",
+	            "value": "${PV_NFS_PATH}"
                   }
-		]
+		],
+                "volumeMounts": [
+                    {
+                        "name": "${MAVEN_VOLUME_NAME}",
+                        "mountPath": "${PV_NFS_PATH}"
+                    }
+                ]
               }
             ],
             "restartPolicy": "Always",
@@ -1055,6 +1146,14 @@
             "generateName": "${FABRIC_ENSEMBLE_CONTAINER_NAME5}-"
           },
           "spec": {
+            "volumes": [
+                {
+                    "name": "${MAVEN_VOLUME_NAME}",
+                    "persistentVolumeClaim": {
+                        "claimName": "${PVC_NAME}"
+                    }
+                }
+            ],
             "containers": [
               {
                 "name": "${FABRIC_ENSEMBLE_CONTAINER_NAME5}",
@@ -1101,10 +1200,16 @@
 	            "value": "${FABRIC_START_ARG}"
                   },
 		  {
-	            "name": "FABRIC_JOINED",
-	            "value": "${FABRIC_JOINED}"
+	            "name": "MAVEN_LOCAL_REPO",
+	            "value": "${PV_NFS_PATH}"
                   }
-		]
+		],
+                "volumeMounts": [
+                    {
+                        "name": "${MAVEN_VOLUME_NAME}",
+                        "mountPath": "${PV_NFS_PATH}"
+                    }
+                ]
               }
             ],
             "restartPolicy": "Always",
@@ -1256,6 +1361,14 @@
             "generateName": "${FABRIC_SERVER_CONTAINER_NAME1}-"
           },
           "spec": {
+            "volumes": [
+                {
+                    "name": "${MAVEN_VOLUME_NAME}",
+                    "persistentVolumeClaim": {
+                        "claimName": "${PVC_NAME}"
+                    }
+                }
+            ],
             "containers": [
               {
                 "name": "${FABRIC_SERVER_CONTAINER_NAME1}",
@@ -1302,10 +1415,16 @@
 	            "value": "${FABRIC_START_ARG}"
                   },
 		  {
-	            "name": "FABRIC_JOINED",
-	            "value": "${FABRIC_JOINED}"
+	            "name": "MAVEN_LOCAL_REPO",
+	            "value": "${PV_NFS_PATH}"
                   }
-		]
+		],
+                "volumeMounts": [
+                    {
+                        "name": "${MAVEN_VOLUME_NAME}",
+                        "mountPath": "${PV_NFS_PATH}"
+                    }
+                ]
               }
             ],
             "restartPolicy": "Always",
@@ -1457,6 +1576,14 @@
             "generateName": "${FABRIC_SERVER_CONTAINER_NAME2}-"
           },
           "spec": {
+            "volumes": [
+                {
+                    "name": "${MAVEN_VOLUME_NAME}",
+                    "persistentVolumeClaim": {
+                        "claimName": "${PVC_NAME}"
+                    }
+                }
+            ],
             "containers": [
               {
                 "name": "${FABRIC_SERVER_CONTAINER_NAME2}",
@@ -1503,10 +1630,16 @@
 	            "value": "${FABRIC_START_ARG}"
                   },
 		  {
-	            "name": "FABRIC_JOINED",
-	            "value": "${FABRIC_JOINED}"
+	            "name": "MAVEN_LOCAL_REPO",
+	            "value": "${PV_NFS_PATH}"
                   }
-		]
+		],
+                "volumeMounts": [
+                    {
+                        "name": "${MAVEN_VOLUME_NAME}",
+                        "mountPath": "${PV_NFS_PATH}"
+                    }
+                ]
               }
             ],
             "restartPolicy": "Always",
@@ -1658,6 +1791,14 @@
             "generateName": "${FABRIC_SERVER_CONTAINER_NAME3}-"
           },
           "spec": {
+            "volumes": [
+                {
+                    "name": "${MAVEN_VOLUME_NAME}",
+                    "persistentVolumeClaim": {
+                        "claimName": "${PVC_NAME}"
+                    }
+                }
+            ],
             "containers": [
               {
                 "name": "${FABRIC_SERVER_CONTAINER_NAME3}",
@@ -1704,10 +1845,16 @@
 	            "value": "${FABRIC_START_ARG}"
                   },
 		  {
-	            "name": "FABRIC_JOINED",
-	            "value": "${FABRIC_JOINED}"
+	            "name": "MAVEN_LOCAL_REPO",
+	            "value": "${PV_NFS_PATH}"
                   }
-		]
+		],
+                "volumeMounts": [
+                    {
+                        "name": "${MAVEN_VOLUME_NAME}",
+                        "mountPath": "${PV_NFS_PATH}"
+                    }
+                ]
               }
             ],
             "restartPolicy": "Always",
@@ -1824,12 +1971,37 @@
       "value": "server"
     },
     {
-      "name": "FABRIC_JOINED",
-      "description": "Has the Server joined the fabric already?",
-      "value": "false"
+      "name": "PV_NAME",
+      "description": "Name of the NFS PersistentVolume",
+      "value": "maven-pv"
+    },
+    {
+      "name": "PV_NFS_PATH",
+      "description": "NFS Mount Path for the PersistentVolume",
+      "value": "/mnt/maven"
+    },
+    {
+      "name": "PV_NFS_SERVER",
+      "description": "NFS Server for the PersistentVolume",
+      "value": "fusefabric1.gsslab.rdu2.redhat.com"
+    },
+    {
+      "name": "PVC_NAME",
+      "description": "Name of the NFC PersistentVolumeClaim",
+      "value": "maven-pvc"
+    },
+    {
+      "name": "VOLUME_SIZE",
+      "description": "Size of the NFS Volume",
+      "value": "5Gi"
+    },
+    {
+      "name": "MAVEN_VOLUME_NAME",
+      "description": "Name of the volume in the DeploymentConfig",
+      "value": "fabric-maven-volume"
     }
   ],
   "labels": {
-    "template": "fuse-fabric8-6.2.1.84-5e-3s"
+    "template": "fuse-fabric8-6.2.1.84-5e-3s-pv"
   }
 }

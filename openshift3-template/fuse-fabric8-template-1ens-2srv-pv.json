@@ -2,10 +2,10 @@
   "kind": "Template",
   "apiVersion": "v1",
   "metadata": {
-    "name": "fuse-fabric8-6.2.1.84-1e-1s-pv",
+    "name": "fuse-fabric8-6.2.1.84-1e-2s-pv",
     "creationTimestamp": null,
     "annotations": {
-      "description": "Fuse fabric8 template for 1 ensemble server, 1 fabric server and a NFS PersistentVolume for a fabric8 localRepository",
+      "description": "Fuse fabric8 template for 1 ensemble server, 2 fabric servers and a NFS PersistentVolume for a fabric8 localRepository",
       "iconClass": "icon-fuse",
       "tags": "fuse,fabric8,openshift3"
     }
@@ -572,6 +572,221 @@
           }
         }
       }
+    },
+    {
+      "kind": "Service",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${FABRIC_SERVER_CONTAINER_NAME2}",
+        "creationTimestamp": null,
+        "labels": {
+          "name": "${FABRIC_SERVER_CONTAINER_NAME2}"
+        },
+	"annotations": {
+	  "description": "Fuse Fabric8 Server Node 2 Service"
+	}
+      },
+      "spec": {
+        "ports": [
+          {
+            "name": "web",
+            "protocol": "TCP",
+            "port": 8181,
+            "targetPort": 8181,
+            "nodePort": 0
+          },
+          {
+            "name": "zk-client",
+            "protocol": "TCP",
+            "port": 2181,
+            "targetPort": 2181,
+            "nodePort": 0
+          },
+          {
+            "name": "zk-client2",
+            "protocol": "TCP",
+            "port": 2182,
+            "targetPort": 2182,
+            "nodePort": 0
+          },
+          {
+            "name": "zk-followers",
+            "protocol": "TCP",
+            "port": 2888,
+            "targetPort": 2888,
+            "nodePort": 0
+          },
+          {
+            "name": "zk-election",
+            "protocol": "TCP",
+            "port": 3888,
+            "targetPort": 3888,
+            "nodePort": 0
+          },
+          {
+            "name": "rmi-server",
+            "protocol": "TCP",
+            "port": 44444,
+            "targetPort": 44444,
+            "nodePort": 0
+          },
+          {
+            "name": "karaf",
+            "protocol": "TCP",
+            "port": 8101,
+            "targetPort": 8101,
+            "nodePort": 0
+          },
+          {
+            "name": "rmi",
+            "protocol": "TCP",
+            "port": 1099,
+            "targetPort": 1099,
+            "nodePort": 0
+          }
+        ],
+        "selector": {
+          "name": "${FABRIC_SERVER_CONTAINER_NAME2}"
+        },
+        "portalIP": "",
+        "type": "ClusterIP",
+        "sessionAffinity": "None"
+      }
+    },
+    {
+      "kind": "Route",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${FABRIC_SERVER_CONTAINER_NAME2}",
+        "creationTimestamp": null,
+	"annotations": {
+	  "description": "Fabric Server Node 2 Route"
+	}
+      },
+      "spec": {
+          "host": "${FABRIC_SERVER_CONTAINER_NAME2}${PUBLIC_DOMAIN}",
+          "to": {
+              "kind": "Service",
+              "name": "${FABRIC_SERVER_CONTAINER_NAME2}"
+          }
+      },
+      "status": {}
+    },
+    {
+      "kind": "DeploymentConfig",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${FABRIC_SERVER_CONTAINER_NAME2}",
+        "creationTimestamp": null
+      },
+      "spec": {
+        "strategy": {
+          "type": "Recreate",
+          "resources": {}
+        },
+        "triggers": [
+          {
+            "type": "ImageChange",
+            "imageChangeParams": {
+              "automatic": true,
+              "containerNames": [
+                "${FABRIC_SERVER_CONTAINER_NAME2}"
+              ],
+              "from": {
+                "kind": "ImageStreamTag",
+                "name": "${FABRIC_CONTAINER_IMAGE_NAME}:${FABRIC_IMAGE_VERSION}"
+              }
+            }
+          },
+          {
+            "type": "ConfigChange"
+          }
+        ],
+        "replicas": 1,
+        "selector": {
+          "name": "${FABRIC_SERVER_CONTAINER_NAME2}"
+        },
+        "template": {
+          "metadata": {
+            "name": "${FABRIC_SERVER_CONTAINER_NAME2}",
+            "creationTimestamp": null,
+            "labels": {
+              "name": "${FABRIC_SERVER_CONTAINER_NAME2}"
+            },
+            "generateName": "${FABRIC_SERVER_CONTAINER_NAME2}-"
+          },
+          "spec": {
+            "volumes": [
+                {
+                    "name": "${MAVEN_VOLUME_NAME}",
+                    "persistentVolumeClaim": {
+                        "claimName": "${PVC_NAME}"
+                    }
+                }
+            ],
+            "containers": [
+              {
+                "name": "${FABRIC_SERVER_CONTAINER_NAME2}",
+                "image": "${FABRIC_CONTAINER_IMAGE_NAME}",
+                "resources": {},
+                "terminationMessagePath": "/dev/termination-log",
+                "imagePullPolicy": "IfNotPresent",
+                "capabilities": {},
+                "securityContext": {
+                  "capabilities": {},
+                  "privileged": false
+                },
+		"env": [
+		  {
+	            "name": "FABRIC_ENSEMBLE_ROOT_CONTAINER_NAME",
+	            "value": "${FABRIC_ENSEMBLE_CONTAINER_NAME1}"
+                  },
+		  {
+	            "name": "FABRIC_ENSEMBLE_CONTAINER_NAME",
+	            "value": "${FABRIC_SERVER_CONTAINER_NAME2}"
+                  },
+		  {
+	            "name": "FABRIC_ORIGINAL_MASTER",
+	            "value": "false"
+                  },
+		  {
+	            "name": "FABRIC_USER",
+	            "value": "${FABRIC_USER}"
+                  },
+		  {
+	            "name": "FABRIC_PASSWD",
+	            "value": "${FABRIC_PASSWD}"
+                  },
+		  {
+	            "name": "FABRIC_ROLE",
+	            "value": "${FABRIC_ROLE}"
+                  },
+		  {
+	            "name": "ZK_PASSWD",
+	            "value": "${ZK_PASSWD}"
+                  },
+		  {
+	            "name": "FABRIC_START_ARG",
+	            "value": "${FABRIC_START_ARG}"
+                  },
+		  {
+	            "name": "MAVEN_LOCAL_REPO",
+	            "value": "${PV_NFS_PATH}"
+                  }
+		],
+                "volumeMounts": [
+                    {
+                        "name": "${MAVEN_VOLUME_NAME}",
+                        "mountPath": "${PV_NFS_PATH}"
+                    }
+                ]
+              }
+            ],
+            "restartPolicy": "Always",
+            "dnsPolicy": "ClusterFirst"
+          }
+        }
+      }
     }
   ],
   "parameters": [
@@ -588,12 +803,17 @@
     {
       "name": "FABRIC_SIZE",
       "description": "Fabric Size",
-      "value": "2"
+      "value": "3"
     },
     {
       "name": "FABRIC_SERVER_CONTAINER_NAME1",
       "description": "Fabric Server Container Name 1",
       "value": "fuse-fabric8-server-1"
+    },
+    {
+      "name": "FABRIC_SERVER_CONTAINER_NAME2",
+      "description": "Fabric Server Container Name 2",
+      "value": "fuse-fabric8-server-2"
     },
     {
       "name": "FABRIC_CONTAINER_IMAGE_NAME",
@@ -682,6 +902,6 @@
     }
   ],
   "labels": {
-    "template": "fuse-fabric8-6.2.1.84-1e-1s-pv"
+    "template": "fuse-fabric8-6.2.1.84-1e-2s-pv"
   }
 }
