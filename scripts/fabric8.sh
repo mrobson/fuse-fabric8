@@ -18,10 +18,6 @@ if [ -z $FABRIC_START_ARG ]; then
 	echo "FABRIC_START_ARG has not been set, something is wrong with the pod"
 	exit 1
 fi
-if [ -z $FABRIC_JOINED ]; then
-	echo "FABRIC_JOINED has not been set, something is wrong with the pod"
-	exit 1
-fi
 if [ -z $FABRIC_USER ]; then
 	echo "FABRIC_USER has not been set, something is wrong with the pod"
 	exit 1
@@ -38,29 +34,38 @@ if [ -z $ZK_PASSWD ]; then
 	echo "ZK_PASSWD has not been set, something is wrong with the pod"
 	exit 1
 fi
+if [ -n $MAVEN_LOCAL_REPO ]; then
+echo 'io.fabric8.maven.localRepository = '${MAVEN_LOCAL_REPO} >> ./fabric/import/fabric/profiles/default.profile/io.fabric8.maven.properties
+fi
 
 echo "Starting Fuse"
 ./bin/fuse $START_ARG & process=$!
-echo "Sleeping 60"
 sleep 60
 
-if [ "$FABRIC_ORIGINAL_MASTER" == "true" ] && [ "$FABRIC_JOINED" == "false" ]; then
+if [ "$FABRIC_ORIGINAL_MASTER" == "true" ]; then
+	if [ -z $FABRIC_SERVER_BASE_CONTAINER_NAME ]; then
+		echo "FABRIC_SERVER_BASE_CONTAINER_NAME has not been set, something is wrong with the pod"
+		exit 1
+	fi
+	if [ -z $FABRIC_SIZE ]; then
+		echo "FABRIC_SIZE has not been set, something is wrong with the pod"
+		exit 1
+	fi
 	count=0
 	while :
 	do
 		echo "Master Client Check"
 		./bin/client "version"; return=$?
-		echo "Process Return " $return
 		if [ $return -eq 0 ]; then
 			sleep 15
-			./bin/client "fabric:create --wait-for-provisioning --verbose --clean --bootstrap-timeout 300000 --new-user ${FABRIC_USER} --new-user-role ${FABRIC_ROLE} --new-user-password ${FABRIC_PASSWD} --zookeeper-password ${ZK_PASSWD} --resolver manualip --manual-ip ${FABRIC_ENSEMBLE_CONTAINER_NAME}.default.endpoints.cluster.local"
+			./bin/client "fabric:create --wait-for-provisioning --verbose --clean --bootstrap-timeout 60000 --new-user ${FABRIC_USER} --new-user-role ${FABRIC_ROLE} --new-user-password ${FABRIC_PASSWD} --zookeeper-password ${ZK_PASSWD} --resolver manualip --manual-ip ${FABRIC_ENSEMBLE_CONTAINER_NAME}.default.endpoints.cluster.local"
 			break
 		else
 			sleep 5
 			(( count++ ))
-			echo "Failures at " $count
+			echo "Failed to get client session " $count " times."
 			if [ $count == 60 ]; then
-				echo "Failed to get a client session after 5 minutes, fabric join exiting on " $HOSTNAME
+				echo "Failed to get a client session after 5 minutes, fabric create exiting on " $HOSTNAME
 				exit 1
 			fi
 		fi
@@ -145,12 +150,11 @@ print srvs
 	fi
 	done
 	wait $process
-elif [ "$FABRIC_ORIGINAL_MASTER" == "false" ] && [ "$FABRIC_JOINED" == "false" ]; then
+elif [ "$FABRIC_ORIGINAL_MASTER" == "false" ]; then
 	count=0
 	while :
 	do
 		echo "Ensemble Master Check"
-		echo "Root Ensemble is " $FABRIC_ENSEMBLE_ROOT_CONTAINER_NAME
 		provCurl=`curl -u ${FABRIC_USER}:${FABRIC_PASSWD} -s 'http://'${FABRIC_ENSEMBLE_ROOT_CONTAINER_NAME}'.default.endpoints.cluster.local:8181/jolokia/exec/io.fabric8:type=ZooKeeper/read/!/fabric!/registry!/containers!/provision!/'${FABRIC_ENSEMBLE_ROOT_CONTAINER_NAME}'!/result'` 
 		if [[ "$provCurl" =~ "children" ]]; then 
 			provStatus=`echo $provCurl | python -c "import json,sys;obj=json.load(sys.stdin);print obj['value']['stringData'];"`
