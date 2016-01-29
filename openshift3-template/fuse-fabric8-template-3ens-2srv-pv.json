@@ -2,7 +2,7 @@
   "kind": "Template",
   "apiVersion": "v1",
   "metadata": {
-    "name": "fuse-fabric8-6.2.1.84-3e-2s-pv",
+    "name": "fuse-fabric8-6.2.1.090-3e-2s-pv",
     "creationTimestamp": null,
     "annotations": {
       "description": "Fuse fabric8 template for 3 ensemble servers, 2 fabric servers and a NFS PersistentVolume for a fabric8 localRepository",
@@ -1273,7 +1273,7 @@
     {
       "name": "FABRIC_IMAGE_VERSION",
       "description": "Fabric Docker Image Version",
-      "value": "6.2.1.84"
+      "value": "6.2.1.090"
     },
     {
       "name": "FABRIC_IMAGE_GIT_REPO",
@@ -1342,6 +1342,6 @@
     }
   ],
   "labels": {
-    "template": "fuse-fabric8-6.2.1.84-3e-2s-pv"
+    "template": "fuse-fabric8-6.2.1.090-3e-2s-pv"
   }
 }

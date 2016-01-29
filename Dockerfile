@@ -1,4 +1,4 @@
-FROM mrobson/fuse-base-install:6.2.1.84
+FROM mrobson/fuse-base-install:6.2.1.090
 
 MAINTAINER Matthew Robson <matthewrobson@gmail.com>
 
