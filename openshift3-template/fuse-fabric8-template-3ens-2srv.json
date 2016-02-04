@@ -1233,7 +1233,7 @@
     {
       "name": "PROJECT_NAME",
       "description": "Name of the OpenShift 3 Project",
-      "value": "fabric8"
+      "value": "default"
     }
   ],
   "labels": {
