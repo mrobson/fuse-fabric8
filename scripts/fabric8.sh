@@ -62,7 +62,7 @@ if [ "$FABRIC_ORIGINAL_MASTER" == "true" ]; then
 		./bin/client "version"; return=$?
 		if [ $return -eq 0 ]; then
 			sleep 15
-			./bin/client "fabric:create --wait-for-provisioning --verbose --clean --bootstrap-timeout 60000 --new-user ${FABRIC_USER} --new-user-role ${FABRIC_ROLE} --new-user-password ${FABRIC_PASSWD} --zookeeper-password ${ZK_PASSWD} --resolver manualip --manual-ip ${FABRIC_ENSEMBLE_CONTAINER_NAME}.${PROJECT_NAME}.endpoints.cluster.local"
+			./bin/client "fabric:create --wait-for-provisioning --verbose --clean --bootstrap-timeout 240000 --new-user ${FABRIC_USER} --new-user-role ${FABRIC_ROLE} --new-user-password ${FABRIC_PASSWD} --zookeeper-password ${ZK_PASSWD} --resolver manualip --manual-ip ${FABRIC_ENSEMBLE_CONTAINER_NAME}.${PROJECT_NAME}.endpoints.cluster.local"
 			break
 		else
 			sleep 5
