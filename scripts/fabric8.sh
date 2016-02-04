@@ -62,7 +62,7 @@ if [ "$FABRIC_ORIGINAL_MASTER" == "true" ]; then
 		./bin/client "version"; return=$?
 		if [ $return -eq 0 ]; then
 			sleep 15
-			./bin/client "fabric:create --wait-for-provisioning --verbose --clean --bootstrap-timeout 240000 --new-user ${FABRIC_USER} --new-user-role ${FABRIC_ROLE} --new-user-password ${FABRIC_PASSWD} --zookeeper-password ${ZK_PASSWD} --resolver manualip --manual-ip ${FABRIC_ENSEMBLE_CONTAINER_NAME}.${PROJECT_NAME}.endpoints.cluster.local"
+			./bin/client "fabric:create --wait-for-provisioning --verbose --clean --bootstrap-timeout 240000 --new-user ${FABRIC_USER} --new-user-role ${FABRIC_ROLE} --new-user-password ${FABRIC_PASSWD} --zookeeper-password ${ZK_PASSWD} --resolver manualip --manual-ip ${FABRIC_ENSEMBLE_CONTAINER_NAME}.${PROJECT_NAME}.svc.cluster.local"
 			break
 		else
 			sleep 5
@@ -80,7 +80,7 @@ if [ "$FABRIC_ORIGINAL_MASTER" == "true" ]; then
 	do
 	echo "Starting Ensemble Add"
 	ENSEMBLE_STRING=
-	aliveServers=`curl -u ${FABRIC_USER}:${FABRIC_PASSWD} -s 'http://'${FABRIC_ENSEMBLE_ROOT_CONTAINER_NAME}'.'${PROJECT_NAME}'.endpoints.cluster.local:8181/jolokia/exec/io.fabric8:type=ZooKeeper/read/!/fabric!/registry!/containers!/alive'`
+	aliveServers=`curl -u ${FABRIC_USER}:${FABRIC_PASSWD} -s 'http://'${FABRIC_ENSEMBLE_ROOT_CONTAINER_NAME}'.'${PROJECT_NAME}'.svc.cluster.local:8181/jolokia/exec/io.fabric8:type=ZooKeeper/read/!/fabric!/registry!/containers!/alive'`
 	echo "Alive Server are " $aliveServers
 	if [[ "$aliveServers" =~ "children" ]]; then
 servers=($(echo $aliveServers | python -c 'import json,sys,re,os
@@ -97,10 +97,10 @@ print srvs
 		do
 
 		if [ "$server" ]; then
-			alive=`curl -u ${FABRIC_USER}:${FABRIC_PASSWD} -s 'http://'${FABRIC_ENSEMBLE_ROOT_CONTAINER_NAME}'.'${PROJECT_NAME}'.endpoints.cluster.local:8181/jolokia/exec/io.fabric8:type=ZooKeeper/read/!/fabric!/registry!/containers!/alive!/'${server}''`
+			alive=`curl -u ${FABRIC_USER}:${FABRIC_PASSWD} -s 'http://'${FABRIC_ENSEMBLE_ROOT_CONTAINER_NAME}'.'${PROJECT_NAME}'.svc.cluster.local:8181/jolokia/exec/io.fabric8:type=ZooKeeper/read/!/fabric!/registry!/containers!/alive!/'${server}''`
 
 			if [[ "$alive" =~ "children" ]]; then
-				provCurl=`curl -u ${FABRIC_USER}:${FABRIC_PASSWD} -s 'http://'${FABRIC_ENSEMBLE_ROOT_CONTAINER_NAME}'.'${PROJECT_NAME}'.endpoints.cluster.local:8181/jolokia/exec/io.fabric8:type=ZooKeeper/read/!/fabric!/registry!/containers!/provision!/'${server}'!/result'`
+				provCurl=`curl -u ${FABRIC_USER}:${FABRIC_PASSWD} -s 'http://'${FABRIC_ENSEMBLE_ROOT_CONTAINER_NAME}'.'${PROJECT_NAME}'.svc.cluster.local:8181/jolokia/exec/io.fabric8:type=ZooKeeper/read/!/fabric!/registry!/containers!/provision!/'${server}'!/result'`
 				if [[ "$provCurl" =~ "children" ]]; then
 					provStatus=`echo $provCurl | python -c "import json,sys;obj=json.load(sys.stdin);print obj['value']['stringData'];"`
 					echo "Provisioning Status is " $provStatus
@@ -159,7 +159,7 @@ elif [ "$FABRIC_ORIGINAL_MASTER" == "false" ]; then
 	while :
 	do
 		echo "Ensemble Master Check"
-		provCurl=`curl -u ${FABRIC_USER}:${FABRIC_PASSWD} -s 'http://'${FABRIC_ENSEMBLE_ROOT_CONTAINER_NAME}'.'${PROJECT_NAME}'.endpoints.cluster.local:8181/jolokia/exec/io.fabric8:type=ZooKeeper/read/!/fabric!/registry!/containers!/provision!/'${FABRIC_ENSEMBLE_ROOT_CONTAINER_NAME}'!/result'` 
+		provCurl=`curl -u ${FABRIC_USER}:${FABRIC_PASSWD} -s 'http://'${FABRIC_ENSEMBLE_ROOT_CONTAINER_NAME}'.'${PROJECT_NAME}'.svc.cluster.local:8181/jolokia/exec/io.fabric8:type=ZooKeeper/read/!/fabric!/registry!/containers!/provision!/'${FABRIC_ENSEMBLE_ROOT_CONTAINER_NAME}'!/result'` 
 		if [[ "$provCurl" =~ "children" ]]; then 
 			provStatus=`echo $provCurl | python -c "import json,sys;obj=json.load(sys.stdin);print obj['value']['stringData'];"`
 			echo "Provisioning Status is " $provStatus
@@ -170,7 +170,7 @@ elif [ "$FABRIC_ORIGINAL_MASTER" == "false" ]; then
 			./bin/client "version"; return=$?
 			if [ $return -eq 0 ]; then
 				sleep 15
-				./bin/client "fabric:join --zookeeper-password ${ZK_PASSWD} --resolver manualip --manual-ip ${FABRIC_ENSEMBLE_CONTAINER_NAME}.${PROJECT_NAME}.endpoints.cluster.local ${FABRIC_ENSEMBLE_ROOT_CONTAINER_NAME}.${PROJECT_NAME}.endpoints.cluster.local:2181"
+				./bin/client "fabric:join --zookeeper-password ${ZK_PASSWD} --resolver manualip --manual-ip ${FABRIC_ENSEMBLE_CONTAINER_NAME}.${PROJECT_NAME}.svc.cluster.local ${FABRIC_ENSEMBLE_ROOT_CONTAINER_NAME}.${PROJECT_NAME}.svc.cluster.local:2181"
 				break
 			else
 				sleep 5

@@ -299,6 +299,10 @@
 		  {
 	            "name": "FABRIC_JOINED",
 	            "value": "${FABRIC_JOINED}"
+                  },
+		  {
+	            "name": "PROJECT_NAME",
+	            "value": "${PROJECT_NAME}"
                   }
 		]
               }
@@ -500,6 +504,10 @@
 		  {
 	            "name": "FABRIC_JOINED",
 	            "value": "${FABRIC_JOINED}"
+                  },
+		  {
+	            "name": "PROJECT_NAME",
+	            "value": "${PROJECT_NAME}"
                   }
 		]
               }
@@ -701,6 +709,10 @@
 		  {
 	            "name": "FABRIC_JOINED",
 	            "value": "${FABRIC_JOINED}"
+                  },
+		  {
+	            "name": "PROJECT_NAME",
+	            "value": "${PROJECT_NAME}"
                   }
 		]
               }
@@ -902,6 +914,10 @@
 		  {
 	            "name": "FABRIC_JOINED",
 	            "value": "${FABRIC_JOINED}"
+                  },
+		  {
+	            "name": "PROJECT_NAME",
+	            "value": "${PROJECT_NAME}"
                   }
 		]
               }
@@ -1103,6 +1119,10 @@
 		  {
 	            "name": "FABRIC_JOINED",
 	            "value": "${FABRIC_JOINED}"
+                  },
+		  {
+	            "name": "PROJECT_NAME",
+	            "value": "${PROJECT_NAME}"
                   }
 		]
               }
@@ -1209,6 +1229,11 @@
       "name": "FABRIC_JOINED",
       "description": "Has the Server joined the fabric already?",
       "value": "false"
+    },
+    {
+      "name": "PROJECT_NAME",
+      "description": "Name of the OpenShift 3 Project",
+      "value": "fabric8"
     }
   ],
   "labels": {
