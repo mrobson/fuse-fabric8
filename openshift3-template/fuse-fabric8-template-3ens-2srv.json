@@ -33,7 +33,7 @@
         "creationTimestamp": null
       },
       "spec": {
-        "dockerImageRepository": "${FABRIC_BASE_IMAGE_LOCATION}${FABRIC_BASE_IMAGE_NAME}:${FABRIC_IMAGE_VERSION}"
+        "dockerImageRepository": "${FABRIC_BASE_IMAGE_LOCATION}${FABRIC_BASE_IMAGE_NAME}"
       },
       "status": {
         "dockerImageRepository": ""
