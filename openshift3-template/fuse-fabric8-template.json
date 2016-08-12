@@ -2,7 +2,7 @@
   "kind": "Template",
   "apiVersion": "v1",
   "metadata": {
-    "name": "fuse-fabric8-6.2.1.090",
+    "name": "fuse-fabric8-6.2.1.117",
     "creationTimestamp": null,
     "annotations": {
       "description": "Fuse fabric8 template",
@@ -1786,7 +1786,7 @@
     {
       "name": "FABRIC_IMAGE_VERSION",
       "description": "Fabric Docker Image Version",
-      "value": "6.2.1.090"
+      "value": "6.2.1.117"
     },
     {
       "name": "FABRIC_IMAGE_GIT_REPO",
@@ -1830,6 +1830,6 @@
     }
   ],
   "labels": {
-    "template": "fuse-fabric8-6.2.1.090"
+    "template": "fuse-fabric8-6.2.1.117"
   }
 }
